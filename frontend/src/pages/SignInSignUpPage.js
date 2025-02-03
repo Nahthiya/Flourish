@@ -2,17 +2,17 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import SignInSignUp from '../components/SignInSignUp';
 
-function SignInSignUpPage() {
-  const navigate = useNavigate(); // Use React Router's navigation
+function SignInSignUpPage({ setIsAuthenticated }) {
+  const navigate = useNavigate();
 
   const handleSuccess = () => {
-    navigate('/home'); // Redirect to the home page
+    navigate('/home'); // Navigate to home on success
   };
 
   return (
     <div>
       <h1>Welcome to Flourish</h1>
-      <SignInSignUp onSuccess={handleSuccess} />
+      <SignInSignUp onSuccess={handleSuccess} setIsAuthenticated={setIsAuthenticated} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
 
@@ -20,3 +21,15 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+class MenstrualData(models.Model):
+    # Use CustomUser directly
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    cycle_length = models.IntegerField(default=28)
+    period_length = models.IntegerField(default=5)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.start_date} to {self.end_date}"

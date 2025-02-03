@@ -7,4 +7,5 @@ urlpatterns = [
     path('api/users/', include('users.urls')),  # API routes from the `users` app
     path('accounts/', include('allauth.urls')),  # Django-AllAuth for social login
     path('', TemplateView.as_view(template_name="index.html")),  # Serve React app's entry point
+    path('users/', include('users.urls')),
 ]

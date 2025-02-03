@@ -1,0 +1,12 @@
+
+.past-period-day {
+  background-color: #ff9999 !important; /* Light red */
+  color: white !important;
+  border-radius: 50%;
+}
+
+.predicted-period-day {
+  background-color: #ffcc99 !important; /* Light orange */
+  color: black !important;
+  border-radius: 50%;
+}

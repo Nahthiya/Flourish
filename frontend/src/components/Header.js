@@ -14,8 +14,9 @@ function Header({ isAuthenticated }) {
             <Link to="/home">Home</Link>
             <Link to="/#chatbot">Chatbot</Link>
             <Link to="/#hub">Hub</Link>
-            <Link to="/#tracker">Tracker</Link>
+            <Link to="/tracker">Tracker</Link>
             <Link to="/#about">About</Link>
+            <Link to="/profile">Profile</Link> {/* Profile link added */}
           </>
         ) : (
           <>

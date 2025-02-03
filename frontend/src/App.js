@@ -5,39 +5,42 @@ import Footer from './components/Footer';
 import LandingPage from './pages/LandingPage';
 import SignInSignUpPage from './pages/SignInSignUpPage';
 import HomePage from './pages/HomePage';
+import MenstrualTracker from './pages/MenstrualTracker';
 import ProtectedRoute from './utils/ProtectedRoute';
+
+window.process = {
+  env: {
+      NODE_ENV: 'development'
+  }
+};
+
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Check if the user is logged in by verifying the access token
   useEffect(() => {
-    const token = localStorage.getItem('accessToken'); // Retrieve token from localStorage
-    setIsAuthenticated(!!token); // Set authentication status
+    const token = localStorage.getItem('accessToken');
+    setIsAuthenticated(!!token); // Set authentication status based on token
   }, []);
 
-  // Logout function to update the authentication state
   const handleLogout = () => {
-    localStorage.removeItem('accessToken'); // Clear the token
-    setIsAuthenticated(false); // Update authentication state
+    localStorage.removeItem('accessToken'); // Clear token
+    setIsAuthenticated(false);
   };
 
   return (
     <Router>
       <div className="App">
-        {/* Pass authentication status and logout function to Header */}
         <Header isAuthenticated={isAuthenticated} onLogout={handleLogout} />
         <Routes>
-          {/* Public Routes */}
           <Route
             path="/"
-            element={
-              isAuthenticated ? <Navigate to="/home" /> : <LandingPage />
-            }
+            element={isAuthenticated ? <Navigate to="/home" /> : <LandingPage />}
           />
-          <Route path="/signin-signup" element={<SignInSignUpPage />} />
-
-          {/* Protected Routes */}
+          <Route
+            path="/signin-signup"
+            element={<SignInSignUpPage setIsAuthenticated={setIsAuthenticated} />}
+          />
           <Route
             path="/home"
             element={
@@ -46,6 +49,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/tracker" element={<ProtectedRoute isAuthenticated={isAuthenticated}><MenstrualTracker /></ProtectedRoute>} />
         </Routes>
         <Footer />
       </div>

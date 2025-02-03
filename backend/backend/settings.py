@@ -59,9 +59,12 @@ LOGIN_REDIRECT_URL = "/"
 ACCOUNT_LOGOUT_REDIRECT_URL = "/"
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
+    'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  
+    ],
 }
 
 MIDDLEWARE = [
@@ -163,6 +166,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True  # Allow cookies (like CSRF token) to be sent
 
+CSRF_COOKIE_NAME = "csrftoken"
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
 ]
@@ -171,3 +175,8 @@ AUTH_USER_MODEL = 'users.CustomUser'
 LOGIN_REDIRECT_URL = '/home'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/signin-signup'
 LOGOUT_REDIRECT_URL = "/signin-signup"
+
+CSRF_COOKIE_HTTPONLY = False
+
+CSRF_USE_SESSIONS = False  # Ensure this matches your backend configuration
+CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPSc

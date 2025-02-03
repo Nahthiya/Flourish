@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
 import './SignInSignUp.css';
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosInstance';
 
-function SignInSignUp({ onSuccess }) {
-  const [isSignUpMode, setIsSignUpMode] = useState(false); // State to toggle forms
+function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
+  const [isSignUpMode, setIsSignUpMode] = useState(false);
   const [signInData, setSignInData] = useState({ username: '', password: '' });
   const [signUpData, setSignUpData] = useState({ username: '', email: '', password: '', confirmPassword: '' });
+  const navigate = useNavigate();
 
   const handleSignUpClick = () => {
-    setIsSignUpMode(true); // Show Sign-Up form
+    setIsSignUpMode(true);
+    setSignInData({ username: '', password: '' });
   };
 
   const handleSignInClick = () => {
-    setIsSignUpMode(false); // Show Sign-In form
+    setIsSignUpMode(false);
+    setSignUpData({ username: '', email: '', password: '', confirmPassword: '' });
   };
 
   const handleInputChange = (e, formType) => {
@@ -24,54 +28,51 @@ function SignInSignUp({ onSuccess }) {
     }
   };
 
-  // Function to fetch CSRF token
   const getCsrfToken = async () => {
     try {
       const response = await axiosInstance.get('/users/csrf-token/', { withCredentials: true });
-      console.log('CSRF token set:', response.data.message);
+      console.log('CSRF token fetched:', response.data.message);
     } catch (error) {
-      console.error('Failed to fetch CSRF token:', error);
+      console.error('Failed to fetch CSRF token:', error.response || error.message);
     }
   };
 
   const handleSignInSubmit = async (e) => {
     e.preventDefault();
+    if (!signInData.username || !signInData.password) {
+      alert('Please enter both username and password.');
+      return;
+    }
     try {
-      // Fetch CSRF token before making the login request
       await getCsrfToken();
-
-      // Send login request
       const response = await axiosInstance.post('/users/login/', signInData, { withCredentials: true });
-
-      // Debugging logs
       console.log('Login Response:', response.data);
-      console.log('Access Token:', response.data.access);
-
-      // Save the access token in localStorage
       localStorage.setItem('accessToken', response.data.access);
-
-      // Call the onSuccess prop to navigate to /home
+      setIsAuthenticated(true);
       alert('Login Successful!');
+      navigate('/home');
       if (onSuccess) onSuccess();
     } catch (error) {
-      console.error('Login Error:', error.response || error.message);
       alert('Login Failed: ' + (error.response?.data?.message || 'Server error'));
     }
   };
 
   const handleSignUpSubmit = async (e) => {
     e.preventDefault();
-    await getCsrfToken(); // Fetch the CSRF token before signup
+    if (!signUpData.username || !signUpData.email || !signUpData.password || !signUpData.confirmPassword) {
+      alert('Please fill out all fields.');
+      return;
+    }
+    if (signUpData.password !== signUpData.confirmPassword) {
+      alert('Passwords do not match.');
+      return;
+    }
     try {
-      const payload = {
-        username: signUpData.username,
-        email: signUpData.email,
-        password: signUpData.password,
-        confirm_password: signUpData.confirmPassword,
-      };
-      const response = await axiosInstance.post('/users/register/', payload, { withCredentials: true });
+      await getCsrfToken();
+      const response = await axiosInstance.post('/users/register/', signUpData, { withCredentials: true });
       alert(response.data.message || 'Sign-Up Successful!');
-      // Call the onSuccess prop to navigate to /home
+      setIsAuthenticated(true);
+      navigate('/home');
       if (onSuccess) onSuccess();
     } catch (error) {
       alert('Sign-Up Failed: ' + (error.response?.data?.message || 'Server error'));
@@ -165,13 +166,13 @@ function SignInSignUp({ onSuccess }) {
             <h3>Or Sign In/Sign Up With</h3>
             <button
               className="social-btn google-btn"
-              onClick={() => window.location.href = 'http://localhost:8000/accounts/google/login/?next=/home'}
+              onClick={() => (window.location.href = 'http://localhost:8000/accounts/google/login/?next=/home')}
             >
               Sign in with Google
             </button>
             <button
               className="social-btn facebook-btn"
-              onClick={() => window.location.href = 'http://localhost:8000/accounts/facebook/login/?next=/home'}
+              onClick={() => (window.location.href = 'http://localhost:8000/accounts/facebook/login/?next=/home')}
             >
               Sign in with Facebook
             </button>
