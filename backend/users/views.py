@@ -119,16 +119,33 @@ class LogoutView(APIView):
         return response
 
 
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from datetime import datetime
+from .models import MenstrualData
+from .serializers import MenstrualDataSerializer
+import logging
+
+logger = logging.getLogger(__name__)
+
 class MenstrualDataView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        """
+        Retrieves user's logged period data.
+        """
         user = request.user
-        data = MenstrualData.objects.filter(user=user).order_by('-start_date')
+        data = MenstrualData.objects.filter(user=user).order_by('start_date')
         serializer = MenstrualDataSerializer(data, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        """
+        Logs user's period data and calculates cycle length dynamically.
+        """
         user = request.user
         data = request.data
 
@@ -155,22 +172,36 @@ class MenstrualDataView(APIView):
         except ValueError:
             return Response({"message": "Period length must be a positive integer."}, status=status.HTTP_400_BAD_REQUEST)
 
+        # ✅ Get previous recorded period
+        previous_period = MenstrualData.objects.filter(user=user).order_by('-start_date').first()
+
+        # ✅ Calculate cycle length dynamically
+        cycle_length = 28  # Default if no previous data
+        if previous_period:
+            cycle_length = (start_date - previous_period.start_date).days
+            if cycle_length <= 0:  # Handle invalid cycle lengths
+                cycle_length = 28
+
         try:
             MenstrualData.objects.create(
                 user=user,
                 start_date=start_date,
                 end_date=end_date,
                 period_length=period_length,
-                cycle_length=28  # Default cycle length
+                cycle_length=cycle_length
             )
-            return Response({"message": "Period data saved successfully"}, status=status.HTTP_201_CREATED)
+            return Response({
+                "message": "Period data saved successfully",
+                "cycle_length": cycle_length  # Send calculated cycle length to frontend
+            }, status=status.HTTP_201_CREATED)
         except Exception as e:
             logger.error(f"Error saving period data: {str(e)}")
             return Response({"message": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     
 class PredictNextCycleView(APIView):
     """
-    View to predict the user's next cycle.
+    Predicts the user's next cycle based on past cycle lengths.
     """
     permission_classes = [IsAuthenticated]
 
@@ -179,7 +210,6 @@ class PredictNextCycleView(APIView):
         data = MenstrualData.objects.filter(user=user).order_by('-start_date')
 
         if not data.exists():
-            # Provide a default estimated cycle for new users
             return Response({
                 "message": "No data available for predictions",
                 "next_period_start": None,
@@ -189,11 +219,29 @@ class PredictNextCycleView(APIView):
                 "suggestion": "Log your first period to start tracking predictions."
             }, status=200)
 
-        avg_cycle_length = round(data.aggregate(Avg('cycle_length'))['cycle_length__avg'] or 28)
-        avg_period_length = round(data.aggregate(Avg('period_length'))['period_length__avg'] or 5)
+        # ✅ Dynamically calculate cycle lengths from past periods
+        cycle_lengths = []
+        period_lengths = []
+        previous_entry = None
 
+        for entry in data:
+            if previous_entry:
+                cycle_length = (previous_entry.start_date - entry.start_date).days
+                cycle_lengths.append(cycle_length)
+            period_lengths.append(entry.period_length)
+            previous_entry = entry
+
+        # ✅ Use average cycle length if multiple periods exist
+        if cycle_lengths:
+            avg_cycle_length = round(sum(cycle_lengths) / len(cycle_lengths))
+        else:
+            avg_cycle_length = 28  # Default if only one record exists
+
+        avg_period_length = round(sum(period_lengths) / len(period_lengths))
+
+        # ✅ Predict from last cycle's **end date**
         last_cycle = data.first()
-        next_start_date = last_cycle.start_date + timedelta(days=avg_cycle_length)
+        next_start_date = last_cycle.end_date + timedelta(days=avg_cycle_length)
         next_end_date = next_start_date + timedelta(days=avg_period_length)
         fertile_window_start = next_start_date - timedelta(days=14)
         fertile_window_end = fertile_window_start + timedelta(days=5)
