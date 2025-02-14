@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import RegisterUserView, LoginView, get_csrf_token, LogoutView
-from .views import MenstrualDataView, PredictNextCycleView
+from .views import MenstrualDataView, PredictNextCycleView, SymptomLogView, SymptomLogListCreateView
 
 urlpatterns = [
     path('register/', RegisterUserView.as_view(), name='register'),
@@ -9,4 +9,6 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('menstrual-data/', MenstrualDataView.as_view(), name='menstrual-data'),
     path('predict-cycle/', PredictNextCycleView.as_view(), name='predict-cycle'),
+    path('symptoms/', SymptomLogView.as_view(), name='symptom-log'),
+    path("symptom-logs/", SymptomLogListCreateView.as_view(), name="symptom-logs"),
 ]

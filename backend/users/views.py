@@ -5,7 +5,7 @@ from rest_framework import status
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import CustomUser, MenstrualData
+from .models import CustomUser, MenstrualData, SymptomLog
 from rest_framework.decorators import api_view, permission_classes
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
@@ -16,6 +16,13 @@ from django.middleware.csrf import get_token
 from django.http import JsonResponse
 import logging
 from datetime import datetime
+from .serializers import SymptomLogSerializer
+from datetime import timedelta
+from rest_framework import generics, permissions
+from .models import SymptomLog
+from .serializers import SymptomLogSerializer
+from django.utils.timezone import now
+from rest_framework import serializers
 
 
 logger = logging.getLogger(__name__)
@@ -252,3 +259,90 @@ class PredictNextCycleView(APIView):
             "fertile_window_start": fertile_window_start,
             "fertile_window_end": fertile_window_end,
         }, status=200)
+
+from django.utils.timezone import now  # Ensure correct import
+import logging
+
+logger = logging.getLogger(__name__)
+
+class SymptomLogView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Retrieve user's logged symptoms"""
+        user = request.user
+        logs = SymptomLog.objects.filter(user=user).order_by('-date')
+        serializer = SymptomLogSerializer(logs, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        """Log symptoms for a specific date"""
+        user = request.user
+        data = request.data
+
+        # Debugging: Log the received request data
+        print("🔍 Received Symptom Log Request:", data)
+
+        # Extract and validate data
+        date = data.get("date")
+        symptoms = data.get("symptoms", [])
+        if not date or not isinstance(symptoms, list) or len(symptoms) == 0:
+            print("❌ Invalid Data: Missing Date or Symptoms not a List")
+            return Response({"message": "Date and symptoms are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Parse the date
+            try:
+                date = datetime.strptime(date, "%Y-%m-%d").date()
+            except ValueError:
+                return Response({"message": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Query for the last period
+            last_period = MenstrualData.objects.filter(
+                user=user, start_date__lte=date, end_date__gte=date
+            ).order_by('-start_date').first()
+
+            # Debugging: Log the query result
+            if last_period:
+                print(f"🔍 Found Last Period: Start Date = {last_period.start_date}, End Date = {last_period.end_date}")
+                cycle_day = (date - last_period.start_date).days + 1
+                print(f"✅ Calculated Cycle Day: {cycle_day}")
+            else:
+                print(f"❌ No matching period found for the given date: {date}")
+                cycle_day = None
+
+            # Debugging: Log data before saving
+            print(f"Creating SymptomLog with: User = {user}, Date = {date}, Cycle Day = {cycle_day}, Symptoms = {symptoms}")
+
+            # Save the symptom log
+            SymptomLog.objects.create(user=user, date=date, cycle_day=cycle_day, symptoms=symptoms)
+
+            # Respond with success and the calculated cycle day
+            return Response({
+                "message": "Symptoms logged successfully",
+                "cycle_day": cycle_day
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            # Enhanced exception handling with detailed logs
+            print(f"❌ Exception occurred: {str(e)}")
+            logger.error(f"Error logging symptoms: {str(e)}")
+            return Response({"message": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class SymptomLogListCreateView(generics.ListCreateAPIView):
+    serializer_class = SymptomLogSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return SymptomLog.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def perform_create(self, serializer):
+        try:
+            print("Incoming data:", serializer.validated_data)
+            serializer.save(user=self.request.user)
+        except serializers.ValidationError as e:
+            print("Validation Error:", e.detail)
+            raise

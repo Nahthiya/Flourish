@@ -10,12 +10,14 @@ import "chart.js/auto";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import "./MenstrualTracker.css"; 
+import SymptomTracker from "../components/SymptomTracker";
 
 
 Chart.register(...registerables);
 
 function MenstrualTracker() {
     const [menstrualData, setMenstrualData] = useState([]);
+    const [symptomLogs, setSymptomLogs] = useState([]);
     const [predictions, setPredictions] = useState(null);
     const [selectedRange, setSelectedRange] = useState([
         {
@@ -67,6 +69,9 @@ function MenstrualTracker() {
         }
     };
     
+    const handleSymptomsLogged = (logs) => {
+        setSymptomLogs(logs);
+    };
 
     const hideOnEscape = (e) => {
         if (e.key === "Escape") {
@@ -154,7 +159,11 @@ function MenstrualTracker() {
                 currentDate = addDays(currentDate, 1);
             }
         }
-    
+    // ✅ Mark symptom logs with a dot
+        symptomLogs.forEach((entry) => {
+            markedDates[entry.date] = "symptom-logged";
+        });
+
         console.log("Updated Marked Dates:", markedDates); // Debugging output
         return markedDates;
     };
@@ -177,7 +186,7 @@ function MenstrualTracker() {
                     parseISO(prevEntry.start_date)
                 );
             });
-    
+
             const periodData = lastCycles.map((entry) => entry.period_length);
     
             // 🚨 Debugging Log
@@ -213,6 +222,7 @@ function MenstrualTracker() {
             });
         }
     }, [menstrualData]);
+     
      
     const cycleOptions = {
         responsive: true,
@@ -262,6 +272,9 @@ function MenstrualTracker() {
         <div className="menstrual-tracker-container">
             <div className="calendar-section">
                 <h1>Menstrual Tracker</h1>
+
+                <SymptomTracker onSymptomsLogged={handleSymptomsLogged} />
+
                 <Calendar
                     tileClassName={({ date }) => {
                         const formattedDate = format(date, "yyyy-MM-dd");
@@ -271,6 +284,9 @@ function MenstrualTracker() {
                         }
                         if (markedDates[formattedDate] === "predicted-period") {
                             return "predicted-period-day";
+                        }
+                        if (markedDates[formattedDate] === "symptom-logged") {
+                            return "symptom-logged-day"; // Class for symptoms
                         }
                         return null;
                     }}

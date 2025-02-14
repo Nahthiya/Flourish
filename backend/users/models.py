@@ -33,3 +33,17 @@ class MenstrualData(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.start_date} to {self.end_date}"
+
+
+class SymptomLog(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    date = models.DateField()  # Date when symptoms were logged
+    cycle_day = models.IntegerField(null=True, blank=True)  # Cycle Day (e.g., Day 1, Day 5)
+    symptoms = models.JSONField()  # Store symptoms as a list (e.g., ["Cramps", "Fatigue"])
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.date} - {self.symptoms}"
+    
+    
