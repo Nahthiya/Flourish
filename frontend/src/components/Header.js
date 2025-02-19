@@ -12,7 +12,7 @@ function Header({ isAuthenticated }) {
           <>
             {/* Links accessible only for authenticated users */}
             <Link to="/home">Home</Link>
-            <Link to="/#chatbot">Chatbot</Link>
+            <Link to="/chatbot">Chatbot</Link>
             <Link to="/#hub">Hub</Link>
             <Link to="/tracker">Tracker</Link>
             <Link to="/#about">About</Link>

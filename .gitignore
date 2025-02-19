@@ -75,3 +75,7 @@ __pycache__/
 *.tmp
 *.bak
 *.old
+
+#Dialogflow JSON key
+config/dialogflow-key.jsonbackend/config/dialogflow-key.json
+backend/config/dialogflow-key.json

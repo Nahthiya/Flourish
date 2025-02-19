@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -78,6 +80,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     'allauth.account.middleware.AccountMiddleware',
 ]
+
+MIDDLEWARE.insert(1, "corsheaders.middleware.CorsMiddleware")
 
 ROOT_URLCONF = "backend.urls"
 
@@ -180,3 +184,11 @@ CSRF_COOKIE_HTTPONLY = False
 
 CSRF_USE_SESSIONS = False  # Ensure this matches your backend configuration
 CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPSc
+
+
+
+GOOGLE_APPLICATION_CREDENTIALS = os.path.join(BASE_DIR, "config/dialogflow-key.json")
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS
+
+DIALOGFLOW_PROJECT_ID = "flourish-448006"
+

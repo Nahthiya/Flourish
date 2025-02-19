@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import './SignInSignUp.css';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../axiosInstance';
+import axiosInstance, { fetchCsrfToken } from '../axiosInstance';
+import './SignInSignUp.css';
 
 function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
   const [isSignUpMode, setIsSignUpMode] = useState(false);
@@ -9,6 +9,11 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
   const [signUpData, setSignUpData] = useState({ username: '', email: '', password: '', confirmPassword: '' });
   const navigate = useNavigate();
 
+  useEffect(() => {
+    fetchCsrfToken();
+  }, []);
+
+  // Function to toggle sign-up mode
   const handleSignUpClick = () => {
     setIsSignUpMode(true);
     setSignInData({ username: '', password: '' });
@@ -28,15 +33,6 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
     }
   };
 
-  const getCsrfToken = async () => {
-    try {
-      const response = await axiosInstance.get('/users/csrf-token/', { withCredentials: true });
-      console.log('CSRF token fetched:', response.data.message);
-    } catch (error) {
-      console.error('Failed to fetch CSRF token:', error.response || error.message);
-    }
-  };
-
   const handleSignInSubmit = async (e) => {
     e.preventDefault();
     if (!signInData.username || !signInData.password) {
@@ -44,8 +40,7 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
       return;
     }
     try {
-      await getCsrfToken();
-      const response = await axiosInstance.post('/users/login/', signInData, { withCredentials: true });
+      const response = await axiosInstance.post('/users/login/', signInData);
       console.log('Login Response:', response.data);
       localStorage.setItem('accessToken', response.data.access);
       setIsAuthenticated(true);
@@ -68,8 +63,7 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
       return;
     }
     try {
-      await getCsrfToken();
-      const response = await axiosInstance.post('/users/register/', signUpData, { withCredentials: true });
+      const response = await axiosInstance.post('/users/register/', signUpData);
       alert(response.data.message || 'Sign-Up Successful!');
       setIsAuthenticated(true);
       navigate('/home');
@@ -86,97 +80,20 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
           {/* Sign-In Form */}
           <form className="sign-in-form" onSubmit={handleSignInSubmit}>
             <h2 className="title">Sign In</h2>
-            <div className="input-field">
-              <i className="fas fa-user"></i>
-              <input
-                type="text"
-                name="username"
-                placeholder="Username"
-                value={signInData.username}
-                onChange={(e) => handleInputChange(e, 'signIn')}
-                required
-              />
-            </div>
-            <div className="input-field">
-              <i className="fas fa-lock"></i>
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={signInData.password}
-                onChange={(e) => handleInputChange(e, 'signIn')}
-                required
-              />
-            </div>
+            <input type="text" name="username" placeholder="Username" value={signInData.username} onChange={(e) => handleInputChange(e, 'signIn')} required />
+            <input type="password" name="password" placeholder="Password" value={signInData.password} onChange={(e) => handleInputChange(e, 'signIn')} required />
             <input type="submit" value="Login" className="btn solid" />
           </form>
 
           {/* Sign-Up Form */}
           <form className="sign-up-form" onSubmit={handleSignUpSubmit}>
             <h2 className="title">Sign Up</h2>
-            <div className="input-field">
-              <i className="fas fa-user"></i>
-              <input
-                type="text"
-                name="username"
-                placeholder="Username"
-                value={signUpData.username}
-                onChange={(e) => handleInputChange(e, 'signUp')}
-                required
-              />
-            </div>
-            <div className="input-field">
-              <i className="fas fa-envelope"></i>
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                value={signUpData.email}
-                onChange={(e) => handleInputChange(e, 'signUp')}
-                required
-              />
-            </div>
-            <div className="input-field">
-              <i className="fas fa-lock"></i>
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={signUpData.password}
-                onChange={(e) => handleInputChange(e, 'signUp')}
-                required
-              />
-            </div>
-            <div className="input-field">
-              <i className="fas fa-lock"></i>
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                value={signUpData.confirmPassword}
-                onChange={(e) => handleInputChange(e, 'signUp')}
-                required
-              />
-            </div>
+            <input type="text" name="username" placeholder="Username" value={signUpData.username} onChange={(e) => handleInputChange(e, 'signUp')} required />
+            <input type="email" name="email" placeholder="Email" value={signUpData.email} onChange={(e) => handleInputChange(e, 'signUp')} required />
+            <input type="password" name="password" placeholder="Password" value={signUpData.password} onChange={(e) => handleInputChange(e, 'signUp')} required />
+            <input type="password" name="confirmPassword" placeholder="Confirm Password" value={signUpData.confirmPassword} onChange={(e) => handleInputChange(e, 'signUp')} required />
             <input type="submit" value="Sign Up" className="btn solid" />
           </form>
-
-          {/* Social Sign-In Buttons */}
-          <div className="social-signin">
-            <h3>Or Sign In/Sign Up With</h3>
-            <button
-              className="social-btn google-btn"
-              onClick={() => (window.location.href = 'http://localhost:8000/accounts/google/login/?next=/home')}
-            >
-              Sign in with Google
-            </button>
-            <button
-              className="social-btn facebook-btn"
-              onClick={() => (window.location.href = 'http://localhost:8000/accounts/facebook/login/?next=/home')}
-            >
-              Sign in with Facebook
-            </button>
-          </div>
         </div>
       </div>
 
@@ -184,7 +101,7 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
         <div className="panel left-panel">
           <div className="content">
             <h3>New here?</h3>
-            <p>Sign up to access all Flourish features!</p>
+            <p>Sign up to access all features!</p>
             <button className="btn transparent" onClick={handleSignUpClick}>
               Sign Up
             </button>
@@ -194,7 +111,7 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
         <div className="panel right-panel">
           <div className="content">
             <h3>Already a user?</h3>
-            <p>Sign in to continue using Flourish.</p>
+            <p>Sign in to continue.</p>
             <button className="btn transparent" onClick={handleSignInClick}>
               Sign In
             </button>

@@ -5,29 +5,25 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000/api";
 
 // Function to retrieve CSRF token from cookies
 const getCsrfToken = () => {
-    const csrfCookie = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("csrftoken"))
-        ?.split("=")[1];
-
+    const cookies = document.cookie.split("; ");
+    const csrfCookie = cookies.find(row => row.startsWith("csrftoken="));
     if (!csrfCookie) {
         console.warn("CSRF token is missing. Ensure /csrf-token/ endpoint is called.");
+        return null;
     }
-
-    return csrfCookie;
+    return csrfCookie.split("=")[1];
 };
 
 // Function to dynamically fetch CSRF token and store it in cookies
 const fetchCsrfToken = async () => {
     try {
         const response = await axios.get(`${API_URL}/users/csrf-token/`, {
-            withCredentials: true,
+            withCredentials: true, // Important to include cookies
         });
 
-        // Extract and store the CSRF token
         const csrfToken = response.data.csrfToken || response.data.token;
         if (csrfToken) {
-            document.cookie = `csrftoken=${csrfToken}; path=/`;
+            document.cookie = `csrftoken=${csrfToken}; path=/; SameSite=Lax`;
             console.log("CSRF token stored successfully:", csrfToken);
         } else {
             console.warn("CSRF token response is empty.");
@@ -51,7 +47,7 @@ axiosInstance.interceptors.request.use(
     async (config) => {
         let csrfToken = getCsrfToken();
 
-        // Fetch CSRF token if it's missing
+        // Fetch CSRF token if missing
         if (!csrfToken) {
             console.log("CSRF token not found. Fetching...");
             await fetchCsrfToken();
@@ -121,7 +117,8 @@ axiosInstance.interceptors.response.use(
     }
 );
 
-// Fetch CSRF Token on Load (ensure it exists)
+// Fetch CSRF token when the app loads
 fetchCsrfToken();
 
+export { fetchCsrfToken };
 export default axiosInstance;

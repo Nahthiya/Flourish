@@ -23,20 +23,23 @@ from .models import SymptomLog
 from .serializers import SymptomLogSerializer
 from django.utils.timezone import now
 from rest_framework import serializers
-
+import os
+import json
+from google.cloud import dialogflow_v2 as dialogflow
+from django.conf import settings
+from google.auth import default
+from google.oauth2 import service_account
 
 logger = logging.getLogger(__name__)
+
+BASE_DIR = settings.BASE_DIR
 
 # CSRF Token View (GET Request)
 @ensure_csrf_cookie
 @api_view(['GET'])
 @permission_classes([])  # Allow unauthenticated access
 def get_csrf_token(request):
-    """
-    View to set a CSRF token. Used to ensure CSRF protection is active for the frontend.
-    """
-    return Response({"message": "CSRF cookie set"}, status=status.HTTP_200_OK)
-
+    return JsonResponse({'csrfToken': get_token(request)})
 
 class RegisterUserView(APIView):
     """
@@ -346,3 +349,46 @@ class SymptomLogListCreateView(generics.ListCreateAPIView):
         except serializers.ValidationError as e:
             print("Validation Error:", e.detail)
             raise
+
+# Path to your service account JSON key (Make sure this file exists)
+SERVICE_ACCOUNT_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config/dialogflow-key.json")
+
+# Force Django to use explicit credentials
+credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_PATH)
+
+# Dialogflow project ID
+DIALOGFLOW_PROJECT_ID = 'flourish-448006'  # Replace with your actual project ID
+
+def chatbot_response(request):
+    print("🚀 Headers Sent:", request.headers)
+
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)  # Parse user message from request body
+            user_message = data.get('message', '')
+
+            if not user_message:
+                return JsonResponse({"error": "No message provided"}, status=400)
+
+            # Setup Dialogflow session
+            session_client = dialogflow.SessionsClient(credentials=credentials)
+            session = session_client.session_path(DIALOGFLOW_PROJECT_ID, 'unique-session-id')
+
+            text_input = dialogflow.TextInput(text=user_message, language_code='en')
+            query_input = dialogflow.QueryInput(text=text_input)
+
+            print("🚀 Sending request to Dialogflow:", {"session": session, "query_input": query_input})
+
+            # Get response from Dialogflow
+            response = session_client.detect_intent(request={"session": session, "query_input": query_input})
+            bot_reply = response.query_result.fulfillment_text
+
+            print("✅ Dialogflow Response:", bot_reply)
+
+            return JsonResponse({"response": bot_reply})
+
+        except Exception as e:
+            print("❌ Error in chatbot_response:", str(e))
+            return JsonResponse({"error": "Internal Server Error", "details": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)

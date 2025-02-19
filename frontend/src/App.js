@@ -7,6 +7,7 @@ import SignInSignUpPage from './pages/SignInSignUpPage';
 import HomePage from './pages/HomePage';
 import MenstrualTracker from './pages/MenstrualTracker';
 import ProtectedRoute from './utils/ProtectedRoute';
+import ChatbotPage from './pages/ChatbotPage';
 
 window.process = {
   env: {
@@ -50,6 +51,7 @@ function App() {
             }
           />
           <Route path="/tracker" element={<ProtectedRoute isAuthenticated={isAuthenticated}><MenstrualTracker /></ProtectedRoute>} />
+          <Route path="/chatbot" element={<ChatbotPage />} />
         </Routes>
         <Footer />
       </div>
