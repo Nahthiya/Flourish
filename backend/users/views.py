@@ -29,6 +29,7 @@ from google.cloud import dialogflow_v2 as dialogflow
 from django.conf import settings
 from google.auth import default
 from google.oauth2 import service_account
+import openai
 
 logger = logging.getLogger(__name__)
 
@@ -359,7 +360,15 @@ credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCO
 # Dialogflow project ID
 DIALOGFLOW_PROJECT_ID = 'flourish-448006'  # Replace with your actual project ID
 
+USE_GPT_FALLBACK = False
+
+# Load OpenAI API Key (Only works when activated)
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if OPENAI_API_KEY:
+    openai.api_key = OPENAI_API_KEY
+
 def chatbot_response(request):
+    """Handles chatbot messages using Dialogflow and falls back to GPT-3.5 if enabled"""
     print("🚀 Headers Sent:", request.headers)
 
     if request.method == 'POST':
@@ -383,8 +392,12 @@ def chatbot_response(request):
             response = session_client.detect_intent(request={"session": session, "query_input": query_input})
             bot_reply = response.query_result.fulfillment_text
 
-            print("✅ Dialogflow Response:", bot_reply)
+           # **Fallback to GPT-3.5 if enabled and Dialogflow fails**
+            if USE_GPT_FALLBACK and (not bot_reply or "I don't understand" in bot_reply):
+                print("⚠️ Fallback to GPT-3.5")
+                bot_reply = get_gpt_response(user_message)
 
+            print("✅ Chatbot Response:", bot_reply)
             return JsonResponse({"response": bot_reply})
 
         except Exception as e:
@@ -392,3 +405,23 @@ def chatbot_response(request):
             return JsonResponse({"error": "Internal Server Error", "details": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+def get_gpt_response(user_message):
+    """Fallback to OpenAI's GPT-3.5 if Dialogflow fails"""
+    if not OPENAI_API_KEY or not USE_GPT_FALLBACK:
+        return "Sorry, I'm not able to provide responses at the moment."
+
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful AI assistant."},
+                {"role": "user", "content": user_message}
+            ]
+        )
+        return response["choices"][0]["message"]["content"]
+
+    except Exception as e:
+        print("❌ OpenAI API Error:", str(e))
+        return "I'm experiencing issues. Please try again later."
