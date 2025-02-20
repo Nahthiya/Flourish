@@ -30,6 +30,10 @@ from django.conf import settings
 from google.auth import default
 from google.oauth2 import service_account
 import openai
+import uuid
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from .models import ChatSession, Message
 
 logger = logging.getLogger(__name__)
 
@@ -364,64 +368,105 @@ USE_GPT_FALLBACK = False
 
 # Load OpenAI API Key (Only works when activated)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
 if OPENAI_API_KEY:
     openai.api_key = OPENAI_API_KEY
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def start_new_chat(request):
+    """Creates a new chat session and returns session_id."""
+    user = request.user  # Ensure user is logged in
+
+    try:
+        session_id = str(uuid.uuid4())  # Generate a unique session ID
+        chat_session = ChatSession.objects.create(user=user, session_id=session_id)
+
+        # ✅ Debugging: Check if the session is actually created
+        if chat_session:
+            print(f"✅ New chat session created: {chat_session.session_id} for user {user}")
+        else:
+            print("❌ Chat session creation failed.")
+
+        return JsonResponse({"session_id": session_id})  # ✅ Ensure session_id is returned
+
+    except Exception as e:
+        print(f"❌ Error creating chat session: {str(e)}")
+        return JsonResponse({"error": "Failed to create session"}, status=500)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_chat_history(request):
+    """Fetches the last 10 chat sessions for the logged-in user."""
+    user = request.user
+    chats = ChatSession.objects.filter(user=user).order_by("-created_at")[:10]
+    
+    chat_data = []
+    for chat in chats:
+        messages = chat.messages.order_by("timestamp").values("sender", "text", "timestamp")
+        chat_data.append({"session_id": chat.session_id, "messages": list(messages)})
+
+    return JsonResponse({"chats": chat_data if chat_data else []}) 
+
+
+@api_view(['DELETE'])
+def delete_chat(request, session_id):
+    try:
+        chat = ChatSession.objects.get(session_id=session_id)
+        chat.delete()
+        return Response({"message": "Chat deleted successfully"}, status=status.HTTP_200_OK)
+    except ChatSession.DoesNotExist:
+        return Response({"error": "Chat not found"}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def chatbot_response(request):
-    """Handles chatbot messages using Dialogflow and falls back to GPT-3.5 if enabled"""
-    print("🚀 Headers Sent:", request.headers)
+    """Handles chatbot response & stores messages in DB."""
+    user = request.user
+    data = json.loads(request.body)
+    user_message = data.get("message", "")
+    session_id = data.get("session_id")
 
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)  # Parse user message from request body
-            user_message = data.get('message', '')
+    if not session_id:
+        return JsonResponse({"error": "No session ID provided"}, status=400)
 
-            if not user_message:
-                return JsonResponse({"error": "No message provided"}, status=400)
+    # Ensure session exists
+    chat_session, _ = ChatSession.objects.get_or_create(user=user, session_id=session_id)
 
-            # Setup Dialogflow session
-            session_client = dialogflow.SessionsClient(credentials=credentials)
-            session = session_client.session_path(DIALOGFLOW_PROJECT_ID, 'unique-session-id')
+    # Store user message
+    Message.objects.create(chat=chat_session, sender="user", text=user_message)
 
-            text_input = dialogflow.TextInput(text=user_message, language_code='en')
-            query_input = dialogflow.QueryInput(text=text_input)
+    # Send message to Dialogflow
+    session_client = dialogflow.SessionsClient(credentials=credentials)
+    session = session_client.session_path(DIALOGFLOW_PROJECT_ID, session_id)
+    text_input = dialogflow.TextInput(text=user_message, language_code="en")
+    query_input = dialogflow.QueryInput(text=text_input)
+    response = session_client.detect_intent(request={"session": session, "query_input": query_input})
 
-            print("🚀 Sending request to Dialogflow:", {"session": session, "query_input": query_input})
+    bot_reply = response.query_result.fulfillment_text or "I didn't understand that."
 
-            # Get response from Dialogflow
-            response = session_client.detect_intent(request={"session": session, "query_input": query_input})
-            bot_reply = response.query_result.fulfillment_text
+    # Fallback to GPT-3.5 if Dialogflow fails
+    if USE_GPT_FALLBACK and bot_reply in ["I don't understand", ""]:
+        bot_reply = get_gpt_response(user_message)
 
-           # **Fallback to GPT-3.5 if enabled and Dialogflow fails**
-            if USE_GPT_FALLBACK and (not bot_reply or "I don't understand" in bot_reply):
-                print("⚠️ Fallback to GPT-3.5")
-                bot_reply = get_gpt_response(user_message)
+    # Store bot response
+    Message.objects.create(chat=chat_session, sender="bot", text=bot_reply)
 
-            print("✅ Chatbot Response:", bot_reply)
-            return JsonResponse({"response": bot_reply})
-
-        except Exception as e:
-            print("❌ Error in chatbot_response:", str(e))
-            return JsonResponse({"error": "Internal Server Error", "details": str(e)}, status=500)
-
-    return JsonResponse({"error": "Invalid request"}, status=400)
+    return JsonResponse({"response": bot_reply})
 
 
 def get_gpt_response(user_message):
-    """Fallback to OpenAI's GPT-3.5 if Dialogflow fails"""
+    """Fallback to OpenAI GPT-3.5 if Dialogflow fails."""
     if not OPENAI_API_KEY or not USE_GPT_FALLBACK:
-        return "Sorry, I'm not able to provide responses at the moment."
+        return "I'm sorry, but I cannot respond at the moment."
 
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful AI assistant."},
-                {"role": "user", "content": user_message}
-            ]
+            messages=[{"role": "system", "content": "You are a helpful AI assistant."},
+                      {"role": "user", "content": user_message}]
         )
         return response["choices"][0]["message"]["content"]
 
     except Exception as e:
-        print("❌ OpenAI API Error:", str(e))
-        return "I'm experiencing issues. Please try again later."
+        return "I'm having trouble responding right now."

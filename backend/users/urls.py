@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import RegisterUserView, LoginView, get_csrf_token, LogoutView
 from .views import MenstrualDataView, PredictNextCycleView, SymptomLogView, SymptomLogListCreateView
-from users.views import chatbot_response
+from users.views import chatbot_response, get_chat_history, start_new_chat, delete_chat
 
 
 urlpatterns = [
@@ -13,5 +13,8 @@ urlpatterns = [
     path('predict-cycle/', PredictNextCycleView.as_view(), name='predict-cycle'),
     path('symptoms/', SymptomLogView.as_view(), name='symptom-log'),
     path("symptom-logs/", SymptomLogListCreateView.as_view(), name="symptom-logs"),
-    path('api/chatbot/', chatbot_response, name='chatbot'),
+    path('chatbot-response/', chatbot_response, name='chatbot-response'),
+    path('get-chat-history/', get_chat_history, name='get-chat-history'),
+    path('start-new-chat/', start_new_chat, name='start-new-chat'),
+    path('delete-chat/<str:session_id>/', delete_chat, name='delete-chat'),
 ]

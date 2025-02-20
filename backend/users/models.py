@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+from django.db.models import Count
+from django.contrib.auth.models import User 
+from django.conf import settings
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
@@ -46,4 +48,28 @@ class SymptomLog(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.date} - {self.symptoms}"
     
-    
+class ChatSession(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # ✅ FIXED: Use dynamic user model
+    session_id = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Chat {self.session_id} ({self.user.username})"
+
+    @staticmethod
+    def cleanup_old_sessions(user):
+        """Keeps only the last 10 chat sessions per user."""
+        chat_count = ChatSession.objects.filter(user=user).count()
+        if chat_count > 10:
+            old_chats = ChatSession.objects.filter(user=user).order_by("created_at")[: chat_count - 10]
+            old_chats.delete()
+
+
+class Message(models.Model):
+    chat = models.ForeignKey(ChatSession, on_delete=models.CASCADE, related_name="messages")
+    sender = models.CharField(max_length=10, choices=[("user", "User"), ("bot", "Bot")])
+    text = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.sender} - {self.text[:50]}"
