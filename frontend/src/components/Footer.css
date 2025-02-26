@@ -1,15 +1,84 @@
+/* Import Modern Sans-Serif Font (Same as Header) */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+/* Footer Styles */
 .footer {
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-top: 1px solid #e5e5e5;
-    display: flex;
-    justify-content: space-between;
-  }
+  background: #F6F5EC; /* Soft neutral background */
+  padding: 60px 5%;
+  color: #412F26;
   
-  .social-icons a,
-  .footer-links a {
-    margin-right: 10px;
-    text-decoration: none;
-    color: #555;
-  }
-  
+}
+
+/* Footer Container */
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 20px; /* Reduced gap to bring sections closer */
+}
+
+/* Left Side - Description */
+.footer-description {
+  flex: 1;
+  max-width: 350px;
+  margin-left: 40px;
+}
+
+.footer-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.footer-description p {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #5D2510;
+}
+
+/* Right Side - Links (Moved Closer) */
+.footer-links {
+  display: flex;
+  gap: 90px; /* Reduced space to bring sections closer */
+  flex: 1;
+  margin-left: 400px;
+}
+
+/* Sections - Quick Links & Follow Us */
+.footer-section h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.footer-section a {
+  display: block;
+  font-size: 1rem;
+  color: #412F26;
+  text-decoration: none;
+  margin-bottom: 8px;
+  transition: color 0.3s ease-in-out;
+}
+
+.footer-section a:hover {
+  color: #806044;
+}
+
+/* Copyright */
+.copyright {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #806044;
+}
+/* Social Media Icons */
+.social-icon {
+  font-size: 10px  !important;
+  margin-right: 8px; /* Spacing between icon and text */
+  color: #412F26;
+  transition: color 0.3s ease-in-out;
+}
+
+.social-icon:hover {
+  color: #806044; /* Color change on hover */
+}

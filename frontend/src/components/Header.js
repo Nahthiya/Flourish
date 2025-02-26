@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './Header.css';
-import logo from '../logo.svg';
+
+const logo = "/images/logo.png";
 
 function Header({ isAuthenticated }) {
   return (
@@ -31,7 +32,7 @@ function Header({ isAuthenticated }) {
       </nav>
       {!isAuthenticated && (
         <Link to="/signin-signup">
-          <button className="sign-button">Sign Up / Sign In</button>
+          <button className="sign-button">Get Started</button>
         </Link>
       )}
     </header>

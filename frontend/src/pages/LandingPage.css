@@ -1,28 +1,360 @@
+/* Import Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300..700;1,300..700&family=Xanh+Mono:ital@0;1&display=swap');
+
+/* General Page Styles */
 .landing-page {
-    text-align: center;
-    padding: 20px;
+  background-color: #F6F5EC; /* Soft cream background */
+  font-family: 'Poppins', sans-serif; /* Modern, clean font */
+  color: #412F26;
+  text-align: center;
+  padding-top: 0; /* Remove extra padding */
+}
+
+/* Ensure Header is Above Slideshow */
+.header {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 10; /* Ensures it stays above slideshow */
+  background: transparent;
+}
+
+/* Slideshow */
+.slideshow {
+  width: 98.5%;
+  height: 95vh;
+  position: relative;
+  overflow: hidden;
+  margin-left: 10px;
+  border-radius: 40px;
+  margin-top: 2px;
+}
+
+.slides {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.slide {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  position: absolute;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.slide.active {
+  opacity: 1;
+}
+
+/* Navigation Dots */
+.slideshow-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  background-color: #ddd;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.dot.active {
+  background-color: #412F26;
+}
+
+/* Features Section */
+.features {
+  padding: 50px 20px;
+}
+
+.features h1 {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  color: black;
+  font-family: "Xanh Mono", serif; /* Custom font applied */
+  font-weight: 600;
+}
+
+/* Feature Grid */
+.feature-grid {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+/* Feature Cards */
+.feature-card {
+  background: white; /* White background */
+  padding: 40px;
+  border-radius: 15px;
+  width: 320px; /* Bigger size */
+  height: 240px; /* Adjusted height for new text link */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* Softer shadow */
+  border: 2px solid #CBB89D; /* Subtle border */
+  text-align: center;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
+  font-family: "Cormorant", serif; /* Applying custom font */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  border-color: #806044; /* Changes border on hover */
+}
+
+/* Feature Card Text Link */
+.feature-text-link {
+  margin-top: 10px;
+  font-size: 1rem;
+  color: #5D2510;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.feature-text-link:hover {
+  opacity: 0.7;
+}
+
+/* Icon Section */
+.feature-card .icon {
+  width: 65px; /* Bigger icons */
+  height: 65px;
+  margin-bottom: 15px;
+}
+
+/* Feature Title */
+.feature-card h3 {
+  font-size: 1.8rem;
+  color: #5D2510;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+/* Feature Description */
+.feature-card p {
+  font-size: 1.2rem;
+  color: #806044;
+}
+
+/* Why Choose Section */
+.why-choose-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 50px;
+  flex-wrap: wrap; /* Allows wrapping on smaller screens */
+}
+
+/* Left Side: Image */
+.why-choose-image {
+  flex: 1;
+  max-width: 500px; /* Ensures image doesn’t take up too much space */
+}
+
+.why-choose-image img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  margin-left: 20px;
+}
+
+/* Right Side: Text */
+.why-choose-text {
+  flex: 1;
+  text-align: left;
+  min-width: 300px; /* Ensures text doesn't shrink too much */
+}
+
+.why-choose-title {
+  font-size: 3.5rem;
+  color: #412F26;
+  font-family: "Xanh Mono", serif;
+  font-weight: 400;
+  margin-bottom: 15px;
+  position: relative;}
+
+  .why-choose-title::after {
+    content: "";
+    display: block;
+    width: 700px;
+    height: 3px;
+    background-color: #5D2510;
+    margin-top: 10px;
   }
-  
-  .overview-section {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 20px;
-    margin: 20px 0;
+  .why-choose-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 40px; /* Increased space between title & list */
+    font-family: "Cormorant", serif;
+    font-size: 1.6rem;
   }
-  
-  .overview-card {
-    width: 200px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 10px;
-    text-align: left;
-    background: white;
-  }
-  
-  .slideshow img {
-    width: 100%;
-    max-width: 600px;
-    margin: 10px auto;
-  }
-  
+.why-choose {
+  padding: 50px 20px;
+}
+
+.why-choose h2 {
+  font-size: 2.4rem;
+  color: black;
+  font-family: "Xanh Mono", serif; /* Custom font applied */
+  font-weight: 600;
+  margin-top: -200px;
+  margin-bottom: 35px;
+}
+
+.why-choose ul {
+  margin-top: 0px;
+  list-style: none;
+  padding: 0;
+  font-weight: 400;
+}
+
+.why-choose li {
+  font-size: 1.2rem;
+  padding: 10px;
+  font-family: "Albert Sans", serif; 
+  font-size: 1.5rem;
+}
+
+.why-choose-list li:hover {
+  transform: translateX(5px);
+}
+
+/* How It Works Section */
+.how-it-works {
+  padding: 80px 5%;
+  background: #6A6F4C;
+  text-align: center;
+}
+
+.how-it-works h2 {
+  font-size: 2.5rem;
+  color: white;
+  font-family: "Xanh Mono", serif;
+  font-weight: 400;
+  margin-bottom: 40px;
+}
+
+/* How It Works Grid */
+.how-it-works-grid {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+/* How It Works Cards */
+.how-card {
+  background: white;
+  padding: 40px;
+  border-radius: 15px;
+  width: 300px;
+  height: 260px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  font-family: "Cormorant", serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.how-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Step Icons */
+.how-card .icon {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+/* Step Titles */
+.how-card h3 {
+  font-size: 1.8rem;
+  color: #5D2510;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+/* Step Descriptions */
+.how-card p {
+  font-size: 1.2rem;
+  color: #806044;
+}
+
+/* How It Works Link */
+.how-link {
+  margin-top: 10px;
+  font-size: 1rem;
+  color: #5D2510;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.how-link:hover {
+  opacity: 0.7;
+}
+
+/* Final CTA Section */
+.cta-section {
+  padding: 80px 5%;
+  background: #FBEFEF;
+  color: black;
+  text-align: center;
+}
+
+.cta-section h2 {
+  font-size: 2.5rem;
+  font-family: "Xanh Mono", serif;
+  font-weight: 400;
+  margin-bottom: 20px;
+color: #592828;
+}
+
+.cta-section p {
+  font-size: 1.4rem;
+  font-family: "Cormorant", serif;
+  max-width: 600px;
+  margin: 0 auto 30px auto;
+}
+
+.cta-button {
+  background: #eeeeee;
+  color: #592828;
+  padding: 15px 30px;
+  font-family: "Albert Sans", serif;
+  font-size: 1.6rem;
+  font-weight: bold;
+  border-radius: 50px;
+  border-color: #592828;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.3s ease-in-out;
+}
+
+.cta-button:hover {
+  background: #CBB89D;
+}
