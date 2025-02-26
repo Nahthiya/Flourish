@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import CustomUser
 from .models import MenstrualData
 from .models import SymptomLog
+from .models import Article, Category
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,3 +18,15 @@ class SymptomLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = SymptomLog
         exclude = ['user']
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ["id", "name"]
+
+class ArticleSerializer(serializers.ModelSerializer):
+    categories = CategorySerializer(many=True)
+
+    class Meta:
+        model = Article
+        fields = "__all__"

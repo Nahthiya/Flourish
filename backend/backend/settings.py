@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.facebook',
     'users',
+    'django_extensions'
 ]
 
 AUTHENTICATION_BACKENDS = (

@@ -73,3 +73,23 @@ class Message(models.Model):
 
     def __str__(self):
         return f"{self.sender} - {self.text[:50]}"
+    
+class Category(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+class Article(models.Model):
+    title = models.CharField(max_length=255)
+    source = models.CharField(max_length=100)  # API Source (HealthFinder, MedlinePlus, Wikipedia)
+    url = models.URLField()
+    categories = models.ManyToManyField(Category, related_name="articles")
+    content = models.TextField()
+    image_url = models.URLField(blank=True, null=True)  # Optional: Article image
+    published_date = models.DateTimeField()
+    keywords = models.TextField(help_text="Keywords matched", blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title

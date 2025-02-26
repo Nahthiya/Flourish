@@ -8,13 +8,13 @@ import HomePage from './pages/HomePage';
 import MenstrualTracker from './pages/MenstrualTracker';
 import ProtectedRoute from './utils/ProtectedRoute';
 import ChatbotPage from './pages/ChatbotPage';
+import HubPage from './pages/HubPage'; // Import HubPage
 
 window.process = {
   env: {
       NODE_ENV: 'development'
   }
 };
-
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -47,6 +47,14 @@ function App() {
             element={
               <ProtectedRoute isAuthenticated={isAuthenticated}>
                 <HomePage onLogout={handleLogout} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/hub"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <HubPage />
               </ProtectedRoute>
             }
           />

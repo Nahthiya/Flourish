@@ -34,6 +34,9 @@ import uuid
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from .models import ChatSession, Message
+from users.models import Article, Category
+from .serializers import ArticleSerializer, CategorySerializer
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
@@ -470,3 +473,24 @@ def get_gpt_response(user_message):
 
     except Exception as e:
         return "I'm having trouble responding right now."
+    
+class CategoryListView(generics.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]  # Enforce authentication
+
+class ArticleListView(generics.ListAPIView):
+    serializer_class = ArticleSerializer
+    permission_classes = [IsAuthenticated]  # Enforce authentication
+
+    def get_queryset(self):
+        queryset = Article.objects.all()
+        category = self.request.query_params.get("category")
+        search = self.request.query_params.get("search")
+
+        if category:
+            queryset = queryset.filter(categories__name__iexact=category)
+        if search:
+            queryset = queryset.filter(Q(title__icontains=search) | Q(content__icontains=search))
+
+        return queryset
