@@ -28,6 +28,32 @@ const fetchCsrfToken = async () => {
         return null;
     }
 };
+//Refresh token
+const refreshToken = async () => {
+    const refreshToken = localStorage.getItem("refreshToken");
+    if (!refreshToken) {
+        console.error("❌ No refresh token available");
+        return false;
+    }
+    
+    try {
+        const response = await axios.post(
+            `${API_URL}/users/token/refresh/`,
+            { refresh: refreshToken },
+            { headers: { "Content-Type": "application/json" } }
+        );
+        
+        if (response.data.access) {
+            localStorage.setItem("accessToken", response.data.access);
+            console.log("✅ Token refreshed successfully");
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.error("❌ Token refresh failed:", error);
+        return false;
+    }
+};
 
 // ✅ Create Axios instance
 const axiosInstance = axios.create({
@@ -41,6 +67,7 @@ const axiosInstance = axios.create({
 // ✅ Request Interceptor: Ensure CSRF and Authorization tokens are included
 axiosInstance.interceptors.request.use(
     async (config) => {
+        console.log('Axios Request Config:', config.url, config.headers);
         // ✅ Ensure CSRF token is fetched before making API requests
         if (!csrfToken) {
             console.log("Fetching CSRF token...");
@@ -64,49 +91,32 @@ axiosInstance.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// ✅ Response Interceptor: Handle Token Expiration & Refresh
+// ✅ Response Interceptor: Handle token refresh
 axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
-
-        if (
-            error.response?.status === 401 &&
-            error.response?.data?.code === "token_not_valid" &&
-            !originalRequest._retry
-        ) {
-            console.warn("⚠️ Access token expired. Attempting refresh...");
+        
+        // ✅ If 401 error and not a retry attempt
+        if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
-            const refreshToken = localStorage.getItem("refreshToken");
-
-            if (refreshToken) {
-                try {
-                    const res = await axios.post(`${API_URL}/users/token/refresh/`, {
-                        refresh: refreshToken,
-                    });
-
-                    localStorage.setItem("accessToken", res.data.access);
-                    originalRequest.headers["Authorization"] = `Bearer ${res.data.access}`;
-
-                    return axiosInstance(originalRequest);
-                } catch (refreshError) {
-                    console.error("❌ Token refresh failed. Logging out...");
-                    localStorage.removeItem("accessToken");
-                    localStorage.removeItem("refreshToken");
-                    window.location.href = "/signin-signup";
-                }
+            
+            const success = await refreshToken();
+            if (success) {
+                // ✅ Retry original request with new token
+                const newAccessToken = localStorage.getItem("accessToken");
+                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                return axiosInstance(originalRequest);
             } else {
-                console.warn("⚠️ No refresh token found. Redirecting to login.");
+                // ✅ Redirect to login if refresh fails
                 localStorage.removeItem("accessToken");
                 localStorage.removeItem("refreshToken");
                 window.location.href = "/signin-signup";
             }
         }
-
         return Promise.reject(error);
     }
 );
-
 // ✅ Fetch CSRF token when the app loads (only once)
 fetchCsrfToken();
 

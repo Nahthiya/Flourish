@@ -8,24 +8,41 @@ import HomePage from './pages/HomePage';
 import MenstrualTracker from './pages/MenstrualTracker';
 import ProtectedRoute from './utils/ProtectedRoute';
 import ChatbotPage from './pages/ChatbotPage';
-import HubPage from './pages/HubPage'; // Import HubPage
+import HubPage from './pages/HubPage';
+import axiosInstance from './axiosInstance';
 
 window.process = {
   env: {
-      NODE_ENV: 'development'
+    NODE_ENV: 'development'
   }
 };
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // Service worker cleanup
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        registrations.forEach(registration => registration.unregister());
+      }).catch(err => console.error('ServiceWorker unregistration failed:', err));
+    }
+  }, []);  // Empty dependency array = runs once on mount
+
+  // Authentication check
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
-    setIsAuthenticated(!!token); // Set authentication status based on token
+    setIsAuthenticated(!!token);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken'); // Clear token
+  const handleLogout = async () => {
+    try {
+      await axiosInstance.post('/users/logout/');
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     setIsAuthenticated(false);
   };
 
@@ -58,7 +75,14 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/tracker" element={<ProtectedRoute isAuthenticated={isAuthenticated}><MenstrualTracker /></ProtectedRoute>} />
+          <Route 
+            path="/tracker" 
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <MenstrualTracker />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/chatbot" element={<ChatbotPage />} />
         </Routes>
         <Footer />

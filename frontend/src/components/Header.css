@@ -10,28 +10,31 @@
   justify-content: space-between;
   align-items: center;
   height: 120px; /* Adjust as needed */
-  padding: 20px 40px;
+  padding: 20px 20px; /* Reduced padding */
   z-index: 1000;
+  box-sizing: border-box; /* Ensure padding is included in width */
+  font-family: "Aboreto", serif;
 }
 
 /* Logo */
 .logo {
-  height: 100px;
-  max-width: 200px;
-  margin-top: 30px;
-  margin-left: 15px;
+  height: 80px; /* Reduced size */
+  max-width: 150px; /* Reduced size */
+  margin-top: 20px; /* Adjusted margin */
+  margin-left: 10px; /* Adjusted margin */
 }
 
 /* Navigation links */
 .nav-links {
   display: flex;
-  gap: 20px;
+  gap: 15px; /* Reduced gap */
+  flex-wrap: wrap; /* Allow links to wrap on smaller screens */
 }
 
 .nav-links a {
   color: black;
   text-decoration: none;
-  font-size: 16px;
+  font-size: 14px; /* Reduced font size */
   font-weight: 500;
   transition: opacity 0.3s ease-in-out;
 }
@@ -43,10 +46,10 @@
 /* Sign In / Sign Up button */
 .sign-button {
   background: white;
-  color: #412F26; /* Dark brown text */
+  color: #644260; /* Updated color */
   border: none;
-  padding: 12px 24px;
-  font-size: 16px;
+  padding: 10px 20px; /* Reduced padding */
+  font-size: 14px; /* Reduced font size */
   font-weight: bold;
   border-radius: 50px; /* Curved button */
   cursor: pointer;
@@ -54,5 +57,54 @@
 }
 
 .sign-button:hover {
-  background: #EDE1D2; /* Light beige hover effect */
+  background: #b8a7b1; /* Updated hover color */
+  color: #fff; /* Updated text color on hover */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header {
+    padding: 10px 10px; /* Further reduced padding */
+    height: 100px; /* Reduced height */
+  }
+
+  .logo {
+    height: 60px; /* Further reduced size */
+    max-width: 120px; /* Further reduced size */
+    margin-top: 10px; /* Adjusted margin */
+    margin-left: 5px; /* Adjusted margin */
+  }
+
+  .nav-links {
+    gap: 10px; /* Further reduced gap */
+  }
+
+  .nav-links a {
+    font-size: 12px; /* Further reduced font size */
+  }
+
+  .sign-button {
+    padding: 8px 16px; /* Further reduced padding */
+    font-size: 12px; /* Further reduced font size */
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    flex-direction: column; /* Stack logo, links, and button vertically */
+    height: auto; /* Auto height for stacked layout */
+    padding: 10px; /* Reduced padding */
+  }
+
+  .logo {
+    margin: 10px 0; /* Adjusted margin */
+  }
+
+  .nav-links {
+    margin: 10px 0; /* Adjusted margin */
+  }
+
+  .sign-button {
+    margin: 10px 0; /* Adjusted margin */
+  }
 }

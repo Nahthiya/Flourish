@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import RegisterUserView, LoginView, get_csrf_token, LogoutView
 from .views import MenstrualDataView, PredictNextCycleView, SymptomLogView, SymptomLogListCreateView
-from users.views import chatbot_response, get_chat_history, start_new_chat, delete_chat, ArticleListView, CategoryListView
+from users.views import chatbot_response, get_chat_history, start_new_chat, delete_chat, ArticleListView, CategoryListView, AuthStatusView
 
 
 urlpatterns = [
@@ -19,4 +19,5 @@ urlpatterns = [
     path('delete-chat/<str:session_id>/', delete_chat, name='delete-chat'),
     path("articles/", ArticleListView.as_view(), name="article-list"),
     path("categories/", CategoryListView.as_view(), name="category-list"),
+    path('users/auth-status/', AuthStatusView.as_view(), name='auth-status'),
 ]

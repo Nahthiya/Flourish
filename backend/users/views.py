@@ -126,16 +126,20 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
-    """
-    View to handle user logout.
-    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        try:
+            refresh_token = request.data.get("refresh")
+            if refresh_token:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+        except Exception as e:
+            pass
+        
         response = Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
-        response.delete_cookie("accessToken")
+        response.delete_cookie("csrftoken")
         return response
-
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -494,3 +498,17 @@ class ArticleListView(generics.ListAPIView):
             queryset = queryset.filter(Q(title__icontains=search) | Q(content__icontains=search))
 
         return queryset
+    
+class AuthStatusView(APIView):
+    """
+    View to check authentication status.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({
+            "authenticated": True,
+            "user_id": request.user.id,
+            "username": request.user.username,
+            "email": request.user.email,
+        }, status=status.HTTP_200_OK)

@@ -11,7 +11,6 @@ function SignInSignUpPage({ setIsAuthenticated }) {
 
   return (
     <div>
-      <h1>Welcome to Flourish</h1>
       <SignInSignUp onSuccess={handleSuccess} setIsAuthenticated={setIsAuthenticated} />
     </div>
   );

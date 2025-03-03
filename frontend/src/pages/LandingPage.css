@@ -1,10 +1,11 @@
 /* Import Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300..700;1,300..700&family=Xanh+Mono:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Aboreto&family=Cormorant:ital,wght@0,300..700;1,300..700&family=Noto+Sans+Warang+Citi&display=swap');
 
 /* General Page Styles */
 .landing-page {
   background-color: #F6F5EC; /* Soft cream background */
-  font-family: 'Poppins', sans-serif; /* Modern, clean font */
+  font-family: 'Arial', sans-serif; /* Modern, clean font */
   color: #412F26;
   text-align: center;
   padding-top: 0; /* Remove extra padding */
@@ -82,7 +83,7 @@
   font-size: 2.5rem;
   margin-bottom: 30px;
   color: black;
-  font-family: "Xanh Mono", serif; /* Custom font applied */
+  font-family: "Aboreto", serif; /* Custom font applied */
   font-weight: 600;
 }
 
@@ -105,7 +106,7 @@
   border: 2px solid #CBB89D; /* Subtle border */
   text-align: center;
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
-  font-family: "Cormorant", serif; /* Applying custom font */
+  font-family: "Xanh Mono", serif; /* Applying custom font */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -187,8 +188,6 @@
 .why-choose-title {
   font-size: 3.5rem;
   color: #412F26;
-  font-family: "Xanh Mono", serif;
-  font-weight: 400;
   margin-bottom: 15px;
   position: relative;}
 
@@ -204,8 +203,8 @@
     list-style: none;
     padding: 0;
     margin-top: 40px; /* Increased space between title & list */
-    font-family: "Cormorant", serif;
-    font-size: 1.6rem;
+    font-family: "Noto Sans Warang Citi", serif;
+    font-size: 1rem;
   }
 .why-choose {
   padding: 50px 20px;
@@ -214,7 +213,7 @@
 .why-choose h2 {
   font-size: 2.4rem;
   color: black;
-  font-family: "Xanh Mono", serif; /* Custom font applied */
+  font-family: "Aboreto", serif; /* Custom font applied */
   font-weight: 600;
   margin-top: -200px;
   margin-bottom: 35px;
@@ -225,13 +224,14 @@
   list-style: none;
   padding: 0;
   font-weight: 400;
+  font-family: "Xanh Mo", serif;
 }
 
 .why-choose li {
-  font-size: 1.2rem;
+  font-size: 1rem;
   padding: 10px;
-  font-family: "Albert Sans", serif; 
   font-size: 1.5rem;
+  font-family: "Xanh Mo", serif;
 }
 
 .why-choose-list li:hover {
@@ -248,7 +248,7 @@
 .how-it-works h2 {
   font-size: 2.5rem;
   color: white;
-  font-family: "Xanh Mono", serif;
+  font-family: "Aboreto", serif;
   font-weight: 400;
   margin-bottom: 40px;
 }
@@ -328,7 +328,7 @@
 
 .cta-section h2 {
   font-size: 2.5rem;
-  font-family: "Xanh Mono", serif;
+  font-family: "Aboreto", serif;
   font-weight: 400;
   margin-bottom: 20px;
 color: #592828;
@@ -336,20 +336,21 @@ color: #592828;
 
 .cta-section p {
   font-size: 1.4rem;
-  font-family: "Cormorant", serif;
+  font-family: "Noto Sans Warang Citi", serif;
   max-width: 600px;
   margin: 0 auto 30px auto;
+  color: #592828;
 }
 
 .cta-button {
   background: #eeeeee;
-  color: #592828;
+  color: black;
   padding: 15px 30px;
-  font-family: "Albert Sans", serif;
+  font-family: "Aboreto", serif;
   font-size: 1.6rem;
   font-weight: bold;
   border-radius: 50px;
-  border-color: #592828;
+  border-color: Black;
   text-decoration: none;
   display: inline-block;
   transition: background 0.3s ease-in-out;
