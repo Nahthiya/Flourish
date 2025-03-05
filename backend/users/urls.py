@@ -20,4 +20,5 @@ urlpatterns = [
     path("articles/", ArticleListView.as_view(), name="article-list"),
     path("categories/", CategoryListView.as_view(), name="category-list"),
     path('users/auth-status/', AuthStatusView.as_view(), name='auth-status'),
+
 ]

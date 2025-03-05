@@ -3,6 +3,8 @@ from django.urls import path, include
 from django.views.generic import TemplateView
 from users.views import chatbot_response
 from users.views import get_csrf_token, AuthStatusView
+from django.conf.urls.static import static
+from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),  # Django admin

@@ -512,3 +512,4 @@ class AuthStatusView(APIView):
             "username": request.user.username,
             "email": request.user.email,
         }, status=status.HTTP_200_OK)
+    

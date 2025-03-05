@@ -7,6 +7,41 @@
   pointer-events: none;
 }
 
+/* Custom toast theme */
+.Toastify__toast {
+  border-radius: 8px;
+  font-family: "Aboreto", serif;
+  font-size: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+/* Make toast text bold */
+.Toastify__toast-body {
+  font-weight: bold; /* Make text bold */
+}
+.Toastify__toast--success {
+  background-color: #ffffff;
+  color: #1f1616;
+}
+
+.Toastify__toast--error {
+  background-color: #FF5252;
+  color: #FFFFFF;
+}
+
+.Toastify__toast--info {
+  background-color: #2196F3;
+  color: #FFFFFF;
+}
+
+.Toastify__toast--warning {
+  background-color: #FFC107;
+  color: #000000;
+}
+
+.Toastify__progress-bar {
+  background-color: rgba(144, 170, 118, 0.7);
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;

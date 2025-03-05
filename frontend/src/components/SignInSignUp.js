@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import axiosInstance, { fetchCsrfToken } from "../axiosInstance";
 import "./SignInSignUp.css";
+import { ToastContainer, toast } from 'react-toastify'; // Import react-toastify
+import 'react-toastify/dist/ReactToastify.css'; // Import CSS
 
 function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
   const [isSignUpMode, setIsSignUpMode] = useState(false)
   const [signInData, setSignInData] = useState({ username: "", password: "" })
-  const [signUpData, setSignUpData] = useState({ username: "", email: "", password: "", confirmPassword: "" })
+  const [signUpData, setSignUpData] = useState({ username: "", email: "", password: "", confirm_password: "" })
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -20,7 +22,7 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
 
   const handleSignInClick = () => {
     setIsSignUpMode(false)
-    setSignUpData({ username: "", email: "", password: "", confirmPassword: "" })
+    setSignUpData({ username: "", email: "", password: "", confirm_password: "" })
   }
 
   const handleInputChange = (e, formType) => {
@@ -44,37 +46,81 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
       localStorage.setItem("accessToken", response.data.access)
       localStorage.setItem("refreshToken", response.data.refresh)
       setIsAuthenticated(true)
-      alert("Login Successful!")
-      navigate("/home")
-      if (onSuccess) onSuccess()
+       // Show success toast
+
+       console.log("Showing toast...");
+      toast.success("Login Successful!", {
+        position: "top-center",
+        autoClose: 2000, // Close after 2 seconds
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+
+      // Redirect to home page after toast closes
+      setTimeout(() => {
+        navigate("/home");
+      }, 2000);
+
+      if (onSuccess) onSuccess();
     } catch (error) {
-      alert("Login Failed: " + (error.response?.data?.message || "Server error"))
+      alert("Login Failed: " + (error.response?.data?.message || "Server error"));
     }
-  }
+  };
 
   const handleSignUpSubmit = async (e) => {
-    e.preventDefault()
-    if (!signUpData.username || !signUpData.email || !signUpData.password || !signUpData.confirmPassword) {
-      alert("Please fill out all fields.")
-      return
+    e.preventDefault();
+    if (!signUpData.username || !signUpData.email || !signUpData.password || !signUpData.confirm_password) {
+      alert("Please fill out all fields.");
+      return;
     }
-    if (signUpData.password !== signUpData.confirmPassword) {
-      alert("Passwords do not match.")
-      return
+    if (signUpData.password !== signUpData.confirm_password) {
+      alert("Passwords do not match.");
+      return;
     }
     try {
-      const response = await axiosInstance.post("/users/register/", signUpData)
-      alert(response.data.message || "Sign-Up Successful!")
-      setIsAuthenticated(true)
-      navigate("/home")
-      if (onSuccess) onSuccess()
+      const response = await axiosInstance.post("/users/register/", signUpData);
+      console.log("Sign-Up Response:", response.data); // Use the response variable
+  
+      // Show success toast
+      toast.success("Sign-Up Successful!", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+  
+      setIsAuthenticated(true);
+  
+      // Redirect to home page after toast closes
+      setTimeout(() => {
+        navigate("/home");
+      }, 2000);
+  
+      if (onSuccess) onSuccess();
     } catch (error) {
-      alert("Sign-Up Failed: " + (error.response?.data?.message || "Server error"))
+      // Show error toast if sign-up fails
+      toast.error("Sign-Up Failed: " + (error.response?.data?.message || "Server error"), {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     }
-  }
+  };
 
   return (
     <div className="signin-signup-page">
+      {/* Toast Container */}
+      <ToastContainer />
     <div className={`container ${isSignUpMode ? "sign-up-mode" : ""}`}>
       <div className="forms-container">
         <div className="signin-signup">
@@ -146,7 +192,7 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
               <i className="fas fa-lock"></i>
               <input
                 type="password"
-                name="confirmPassword"
+                name="confirm_password"
                 placeholder="Confirm Password"
                 value={signUpData.confirmPassword}
                 onChange={(e) => handleInputChange(e, "signUp")}

@@ -10,6 +10,9 @@ import ProtectedRoute from './utils/ProtectedRoute';
 import ChatbotPage from './pages/ChatbotPage';
 import HubPage from './pages/HubPage';
 import axiosInstance from './axiosInstance';
+import { ToastContainer } from 'react-toastify'; // Import ToastContainer
+import 'react-toastify/dist/ReactToastify.css'; // Import CSS
+import './App.css'; 
 
 window.process = {
   env: {
@@ -49,6 +52,18 @@ function App() {
   return (
     <Router>
       <div className="App">
+        {/* Add ToastContainer here */}
+        <ToastContainer
+          position="top-center" // Position of the toast
+          autoClose={2000} // Auto-close after 2 seconds
+          hideProgressBar={false} // Show progress bar
+          newestOnTop={false} // New toasts appear below older ones
+          closeOnClick // Close toast on click
+          rtl={false} // Left-to-right layout
+          pauseOnFocusLoss // Pause toast when window loses focus
+          draggable // Allow dragging to dismiss
+          pauseOnHover // Pause toast on hover
+        />
         <Header isAuthenticated={isAuthenticated} onLogout={handleLogout} />
         <Routes>
           <Route
