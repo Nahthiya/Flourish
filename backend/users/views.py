@@ -238,6 +238,7 @@ class PredictNextCycleView(APIView):
                 "next_period_end": None,
                 "fertile_window_start": None,
                 "fertile_window_end": None,
+                "cycle_progress": 0,
                 "suggestion": "Log your first period to start tracking predictions."
             }, status=200)
 
@@ -268,11 +269,17 @@ class PredictNextCycleView(APIView):
         fertile_window_start = next_start_date - timedelta(days=14)
         fertile_window_end = fertile_window_start + timedelta(days=5)
 
+        # Calculate cycle progress
+        today = datetime.now().date()
+        days_since_last_period = (today - last_cycle.end_date).days
+        cycle_progress = (days_since_last_period / avg_cycle_length) * 100
+
         return Response({
             "next_period_start": next_start_date,
             "next_period_end": next_end_date,
             "fertile_window_start": fertile_window_start,
             "fertile_window_end": fertile_window_end,
+            "cycle_progress": min(cycle_progress, 100),
         }, status=200)
 
 from django.utils.timezone import now  # Ensure correct import

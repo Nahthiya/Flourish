@@ -10,7 +10,7 @@ function Footer() {
         {/* Left Side - Description */}
         <div className="footer-description">
           <h2 className="footer-title">Flourish</h2>
-          <p>Empowering women with trusted health insights, tools, and community support for a better well-being.</p>
+          <p>Empowering women with trusted health insights, tools, and support for a better well-being.</p>
           <p className="copyright">© 2025 Flourish. All Rights Reserved.</p>
         </div>
 
