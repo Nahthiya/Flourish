@@ -518,5 +518,20 @@ class AuthStatusView(APIView):
             "user_id": request.user.id,
             "username": request.user.username,
             "email": request.user.email,
+            "preferred_bot_name": request.user.preferred_bot_name,
         }, status=status.HTTP_200_OK)
     
+class UpdateBotNameView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        new_bot_name = request.data.get("bot_name")
+
+        if not new_bot_name:
+            return Response({"message": "Assistant name is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.preferred_bot_name = new_bot_name
+        user.save()
+
+        return Response({"message": "Assistant name updated successfully"}, status=status.HTTP_200_OK)

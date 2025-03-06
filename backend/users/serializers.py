@@ -7,7 +7,7 @@ from .models import Article, Category
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email']
+        fields = ['id', 'username', 'email', 'preferred_bot_name']
 
 class MenstrualDataSerializer(serializers.ModelSerializer):
     class Meta:

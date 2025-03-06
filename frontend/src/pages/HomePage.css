@@ -266,7 +266,7 @@
   border: 2px solid #CBB89D;
   text-align: center;
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
-  font-family: "Xanh Mono", serif;
+  font-family: 'Open-Sans',  'system-ui';
   display: flex;
   flex-direction: column;
   justify-content: center;
