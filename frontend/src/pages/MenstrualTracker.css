@@ -1,42 +1,112 @@
-
-.past-period-day {
-  background-color: #ff9999 !important; /* Light red */
-  color: white !important;
-  border-radius: 50%;
-}
-
-.predicted-period-day {
-  background-color: #ffcc99 !important; /* Light orange */
-  color: black !important;
-  border-radius: 50%;
+/* General page container to include Header and Footer */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .menstrual-tracker-container {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-  align-items: flex-start;
+  flex: 1;
+  padding: 20px;
+  background-color: #f9f9f9;
 }
 
-.calendar-section {
+h1 {
+  color: #5e4b8b;
+  font-size: 24px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Tracker content (Cycle Summary and Calendar) */
+.tracker-content {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.left-section, .right-section {
   flex: 1;
 }
 
-.charts-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.chart {
+/* Cycle Summary Section */
+.cycle-summary {
   background: #fff;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Symptom-logged days should show a small dot */
+.cycle-summary h2 {
+  color: #5e4b8b;
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+.summary-details p {
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+.summary-details strong {
+  color: #333;
+}
+
+.recent-symptoms {
+  margin-top: 15px;
+}
+
+.recent-symptoms h3 {
+  color: #5e4b8b;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.symptoms-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.symptom-tag {
+  background: #f4e1f7;
+  color: #5e4b8b;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+}
+
+/* Calendar Section */
+.calendar-section {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-section h2 {
+  color: #5e4b8b;
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+.react-calendar {
+  border: none !important;
+  font-family: Arial, sans-serif;
+}
+
+.past-period-day {
+  background-color: #ff9999 !important;
+  color: white !important;
+  border-radius: 50% !important;
+}
+
+.predicted-period-day {
+  background-color: #ffcc99 !important;
+  color: black !important;
+  border-radius: 50% !important;
+}
+
 .symptom-logged-day {
   position: relative;
 }
@@ -49,4 +119,186 @@
   bottom: 2px;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.calendar-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.log-period-btn, .log-symptoms-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.log-period-btn {
+  background: #ff6384;
+  color: white;
+}
+
+.log-symptoms-btn {
+  background: #5e4b8b;
+  color: white;
+}
+
+/* Cycle Insights Section */
+.insights-section {
+  margin-bottom: 20px;
+}
+
+.insights-section h2 {
+  color: #5e4b8b;
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+.insights-cards {
+  display: flex;
+  gap: 15px;
+}
+
+.insight-card {
+  flex: 1;
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.insight-card h3 {
+  color: #333;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.insight-card p {
+  color: #ff6384;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* Charts Section */
+.charts-section {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.chart {
+  flex: 1;
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.chart h3 {
+  color: #5e4b8b;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+/* Export Section */
+.export-section {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.export-section h2 {
+  color: #5e4b8b;
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+.export-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.export-btn {
+  padding: 10px 20px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: #fff;
+  color: #5e4b8b;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.export-btn:hover {
+  background: #f4e1f7;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  width: 500px;
+  max-width: 90%;
+  text-align: center;
+}
+
+.modal-content h2 {
+  color: #5e4b8b;
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+.inputBox {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.calendarElement {
+  margin: 0 auto;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.modal-buttons button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.modal-buttons button:first-child {
+  background: #ff6384;
+  color: white;
+}
+
+.modal-buttons button:last-child {
+  background: #ddd;
+  color: #333;
 }

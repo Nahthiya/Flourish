@@ -33,6 +33,8 @@ import openai
 import uuid
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from .models import MenstrualData
+from .serializers import MenstrualDataSerializer
 from .models import ChatSession, Message
 from users.models import Article, Category
 from .serializers import ArticleSerializer, CategorySerializer
@@ -141,16 +143,6 @@ class LogoutView(APIView):
         response.delete_cookie("csrftoken")
         return response
 
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from datetime import datetime
-from .models import MenstrualData
-from .serializers import MenstrualDataSerializer
-import logging
-
-logger = logging.getLogger(__name__)
 
 class MenstrualDataView(APIView):
     permission_classes = [IsAuthenticated]
@@ -242,7 +234,7 @@ class PredictNextCycleView(APIView):
                 "suggestion": "Log your first period to start tracking predictions."
             }, status=200)
 
-        # ✅ Dynamically calculate cycle lengths from past periods
+        # Dynamically calculate cycle lengths from past periods
         cycle_lengths = []
         period_lengths = []
         previous_entry = None
@@ -254,7 +246,7 @@ class PredictNextCycleView(APIView):
             period_lengths.append(entry.period_length)
             previous_entry = entry
 
-        # ✅ Use average cycle length if multiple periods exist
+        # Use average cycle length if multiple periods exist
         if cycle_lengths:
             avg_cycle_length = round(sum(cycle_lengths) / len(cycle_lengths))
         else:
@@ -262,7 +254,7 @@ class PredictNextCycleView(APIView):
 
         avg_period_length = round(sum(period_lengths) / len(period_lengths))
 
-        # ✅ Predict from last cycle's **end date**
+        # Predict from last cycle's end date
         last_cycle = data.first()
         next_start_date = last_cycle.end_date + timedelta(days=avg_cycle_length)
         next_end_date = next_start_date + timedelta(days=avg_period_length)
@@ -282,7 +274,9 @@ class PredictNextCycleView(APIView):
             "cycle_progress": min(cycle_progress, 100),
         }, status=200)
 
-from django.utils.timezone import now  # Ensure correct import
+
+
+from django.utils.timezone import now
 import logging
 
 logger = logging.getLogger(__name__)
@@ -298,59 +292,75 @@ class SymptomLogView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        """Log symptoms for a specific date"""
+        """Log symptoms for a specific date, combining with existing entry if duplicate."""
         user = request.user
         data = request.data
 
-        # Debugging: Log the received request data
-        print("🔍 Received Symptom Log Request:", data)
-
-        # Extract and validate data
+     # Extract and validate data
         date = data.get("date")
         symptoms = data.get("symptoms", [])
         if not date or not isinstance(symptoms, list) or len(symptoms) == 0:
-            print("❌ Invalid Data: Missing Date or Symptoms not a List")
             return Response({"message": "Date and symptoms are required."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # Parse the date
-            try:
-                date = datetime.strptime(date, "%Y-%m-%d").date()
-            except ValueError:
-                return Response({"message": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+        # Parse the date
+            date = datetime.strptime(date, "%Y-%m-%d").date()
+            logger.info(f"Parsed date from request: {date}")
+        except ValueError:
+            return Response({"message": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Query for the last period
-            last_period = MenstrualData.objects.filter(
-                user=user, start_date__lte=date, end_date__gte=date
-            ).order_by('-start_date').first()
+    # Query for the last period that occurred before or on the symptom log date
+        last_period = MenstrualData.objects.filter(
+             user=user,
+            start_date__lte=date
+        ).order_by('-start_date').first()
+        logger.info(f"Query filter: user={user.id}, start_date__lte={date}, raw query: {MenstrualData.objects.filter(user=user, start_date__lte=date).query}")
 
-            # Debugging: Log the query result
-            if last_period:
-                print(f"🔍 Found Last Period: Start Date = {last_period.start_date}, End Date = {last_period.end_date}")
-                cycle_day = (date - last_period.start_date).days + 1
-                print(f"✅ Calculated Cycle Day: {cycle_day}")
-            else:
-                print(f"❌ No matching period found for the given date: {date}")
+    # Calculate cycle_day if a period is found
+        cycle_day = None
+        if last_period:
+            cycle_day = (date - last_period.start_date).days + 1
+            logger.info(f"Calculated cycle_day: {cycle_day} based on last_period.start_date: {last_period.start_date}")
+            if cycle_day < 1:
+                logger.warning(f"Invalid cycle_day ({cycle_day}) calculated, setting to None")
                 cycle_day = None
+        else:
+            logger.warning("No last period found for the user")
 
-            # Debugging: Log data before saving
-            print(f"Creating SymptomLog with: User = {user}, Date = {date}, Cycle Day = {cycle_day}, Symptoms = {symptoms}")
+    # Check for existing symptom log for the same user and date
+        existing_log = SymptomLog.objects.filter(user=user, date=date).first()
 
-            # Save the symptom log
-            SymptomLog.objects.create(user=user, date=date, cycle_day=cycle_day, symptoms=symptoms)
-
-            # Respond with success and the calculated cycle day
-            return Response({
-                "message": "Symptoms logged successfully",
-                "cycle_day": cycle_day
-            }, status=status.HTTP_201_CREATED)
-
+        try:
+            if existing_log:
+            # Combine symptoms (remove duplicates by converting to set)
+                existing_symptoms = existing_log.symptoms
+                combined_symptoms = list(set(existing_symptoms + symptoms))
+                existing_log.symptoms = combined_symptoms
+                existing_log.cycle_day = cycle_day  # Update cycle_day in case it changed
+                existing_log.save()
+                logger.info(f"Updated existing symptom log for {date} with cycle_day: {cycle_day}, combined symptoms: {combined_symptoms}")
+                return Response({
+                    "message": "Symptoms updated successfully for existing date",
+                    "cycle_day": cycle_day,
+                    "combined_symptoms": combined_symptoms
+                }, status=status.HTTP_200_OK)
+            else:
+            # Create a new symptom log
+                symptom_log = SymptomLog.objects.create(
+                    user=user,
+                    date=date,
+                    cycle_day=cycle_day,
+                    symptoms=symptoms
+                )
+                logger.info(f"Symptom log saved with cycle_day: {symptom_log.cycle_day}")
+                return Response({
+                    "message": "Symptoms logged successfully",
+                    "cycle_day": cycle_day
+                }, status=status.HTTP_201_CREATED)
         except Exception as e:
-            # Enhanced exception handling with detailed logs
-            print(f"❌ Exception occurred: {str(e)}")
             logger.error(f"Error logging symptoms: {str(e)}")
             return Response({"message": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+        
 class SymptomLogListCreateView(generics.ListCreateAPIView):
     serializer_class = SymptomLogSerializer
     permission_classes = [permissions.IsAuthenticated]

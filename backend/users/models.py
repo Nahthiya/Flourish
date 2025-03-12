@@ -49,6 +49,9 @@ class SymptomLog(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.date} - {self.symptoms}"
     
+    class Meta:
+        unique_together = ('user', 'date')
+    
 class ChatSession(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # ✅ FIXED: Use dynamic user model
     session_id = models.CharField(max_length=255, unique=True)
