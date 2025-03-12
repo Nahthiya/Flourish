@@ -545,3 +545,49 @@ class UpdateBotNameView(APIView):
         user.save()
 
         return Response({"message": "Assistant name updated successfully"}, status=status.HTTP_200_OK)
+    
+
+class SymptomReportView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Generate a report of symptoms by cycle day and their ranges."""
+        user = request.user
+        logs = SymptomLog.objects.filter(user=user, cycle_day__isnull=False).order_by('cycle_day')
+
+        if not logs.exists():
+            return Response({
+                "message": "No symptom logs with cycle day available.",
+                "symptoms_by_cycle_day": {},
+                "symptom_ranges": {}
+            }, status=status.HTTP_200_OK)
+
+        # Step 1: Build symptoms_by_cycle_day
+        symptoms_by_cycle_day = {}
+        for log in logs:
+            cycle_day = str(log.cycle_day)  # Convert to string for JSON serialization
+            if cycle_day not in symptoms_by_cycle_day:
+                symptoms_by_cycle_day[cycle_day] = list(set(log.symptoms))  # Initialize with unique symptoms
+            else:
+                # Add new symptoms, ensuring uniqueness
+                symptoms_by_cycle_day[cycle_day] = list(set(symptoms_by_cycle_day[cycle_day] + log.symptoms))
+
+        # Step 2: Build symptom_ranges
+        symptom_cycle_days = {}
+        for log in logs:
+            for symptom in log.symptoms:
+                if symptom not in symptom_cycle_days:
+                    symptom_cycle_days[symptom] = []
+                symptom_cycle_days[symptom].append(log.cycle_day)
+
+        symptom_ranges = {}
+        for symptom, cycle_days in symptom_cycle_days.items():
+            symptom_ranges[symptom] = {
+                "min_cycle_day": min(cycle_days),
+                "max_cycle_day": max(cycle_days)
+            }
+
+        return Response({
+            "symptoms_by_cycle_day": symptoms_by_cycle_day,
+            "symptom_ranges": symptom_ranges
+        }, status=status.HTTP_200_OK)
