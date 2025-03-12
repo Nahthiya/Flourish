@@ -14,6 +14,7 @@ import SymptomTracker from "../components/SymptomTracker";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import jsPDF from "jspdf";
+import Papa from 'papaparse';
 
 Chart.register(...registerables);
 
@@ -695,6 +696,118 @@ function MenstrualTracker() {
             setLoading(false);
         }
     };
+    
+    const handleDownloadCSV = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem("accessToken");
+            const config = {
+                headers: {
+                    Authorization: token ? `Bearer ${token}` : undefined,
+                },
+            };
+    
+            // Fetch user data
+            const userResponse = await axiosInstance.get("/users/users/auth-status/", config);
+            const userName = userResponse.data.username || "User";
+    
+            // Fetch report data
+            const response = await axiosInstance.get("/users/symptom-report/", config);
+    
+            // Prepare data arrays (same as in handleDownloadPDF)
+            const cycleLengthData = [];
+            if (menstrualData.length > 1) {
+                const lastCycles = menstrualData.slice(-6);
+                lastCycles.forEach((entry, index) => {
+                    if (index === 0) return;
+                    const prevEntry = lastCycles[index - 1];
+                    const startDate = parseISO(prevEntry.start_date);
+                    const endDate = parseISO(entry.start_date);
+                    const cycleLength = differenceInDays(endDate, startDate);
+                    cycleLengthData.push({
+                        "Start Date": format(startDate, "MMM d, yyyy"),
+                        "End Date": format(endDate, "MMM d, yyyy"),
+                        "No. of Days": `${cycleLength} days`,
+                    });
+                });
+            }
+    
+            const periodLengthData = [];
+            if (menstrualData.length > 0) {
+                const lastPeriods = menstrualData.slice(-6);
+                lastPeriods.forEach((entry) => {
+                    periodLengthData.push({
+                        "Start Date": format(parseISO(entry.start_date), "MMM d, yyyy"),
+                        "End Date": format(parseISO(entry.end_date), "MMM d, yyyy"),
+                        "No. of Days": `${entry.period_length} days`,
+                    });
+                });
+            }
+    
+            const symptomsData = [];
+            if (response.data.symptoms_by_cycle_day && Object.keys(response.data.symptoms_by_cycle_day).length > 0) {
+                symptomsData.push(...Object.entries(response.data.symptoms_by_cycle_day).map(([cycleDay, symptoms]) => ({
+                    "Cycle Day": `Cycle Day ${cycleDay}`,
+                    "Symptoms": symptoms.join(", "),
+                })));
+            }
+    
+            const symptomRangesData = [];
+            if (response.data.symptom_ranges && Object.keys(response.data.symptom_ranges).length > 0) {
+                symptomRangesData.push(...Object.entries(response.data.symptom_ranges).map(([symptom, range]) => {
+                    const rangeText = range.min_cycle_day === range.max_cycle_day
+                        ? `On cycle day ${range.min_cycle_day}`
+                        : `On cycle days ${range.min_cycle_day} to ${range.max_cycle_day}`;
+                    return {
+                        "Symptom": symptom,
+                        "Likely Cycle Days": rangeText,
+                    };
+                }));
+            }
+    
+            // Prepare summary data
+            const today = new Date();
+            const formattedDateTime = format(today, "MMMM d, yyyy, h:mm a");
+            const summaryData = [{
+                "Name": userName,
+                "Average Cycle Length (days)": `${avgCycleLength} days`,
+                "Average Period Length (days)": `${avgPeriodLength} days`,
+                "Date Generated": formattedDateTime,
+            }];
+    
+            // Combine all data into a single CSV with section headers
+            let csvContent = "=== Summary ===\n";
+            csvContent += Papa.unparse(summaryData) + "\n\n";
+    
+            csvContent += "=== Cycle Length Trends ===\n";
+            csvContent += Papa.unparse(cycleLengthData) + "\n\n";
+    
+            csvContent += "=== Period Length Trends ===\n";
+            csvContent += Papa.unparse(periodLengthData) + "\n\n";
+    
+            csvContent += "=== Symptoms Logged by Cycle Day ===\n";
+            csvContent += Papa.unparse(symptomsData) + "\n\n";
+    
+            csvContent += "=== Cycle Days Where Symptoms Are Likely to Appear ===\n";
+            csvContent += Papa.unparse(symptomRangesData);
+    
+            // Create and download the CSV file
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "menstrual_cycle_report.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error("Error generating CSV:", error);
+            alert("Failed to generate CSV.");
+        } finally {
+            setLoading(false);
+        }
+    };
+    
 
     return (
         <div className="page-container">
@@ -789,12 +902,14 @@ function MenstrualTracker() {
                 <div className="export-section">
                     <h2>Export & Reports</h2>
                     <div className="export-buttons">
-                        <button className="export-btn" onClick={handleDownloadPDF} disabled={loading}>
-                            {loading ? "Generating..." : "Download PDF Report"}
-                        </button>
-                        <button className="export-btn">Export Data as CSV</button>
-                        <button className="export-btn">Share with Doctor</button>
-                    </div>
+    <button className="export-btn" onClick={handleDownloadPDF} disabled={loading}>
+        {loading ? "Generating..." : "Download PDF Report"}
+    </button>
+    <button className="export-btn" onClick={handleDownloadCSV} disabled={loading}>
+        {loading ? "Exporting..." : "Export Data as CSV"}
+    </button>
+    <button className="export-btn">Share with Doctor</button>
+</div>
                 </div>
 
                 {showPeriodModal && (
