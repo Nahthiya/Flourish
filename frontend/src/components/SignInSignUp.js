@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import axiosInstance, { fetchCsrfToken } from "../axiosInstance";
 import "./SignInSignUp.css";
-import { ToastContainer, toast } from 'react-toastify'; // Import react-toastify
-import 'react-toastify/dist/ReactToastify.css'; // Import CSS
+import { ToastContainer, toast } from 'react-toastify'; 
+import 'react-toastify/dist/ReactToastify.css'; 
 
 function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
   const [isSignUpMode, setIsSignUpMode] = useState(false)
@@ -15,11 +15,13 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
     fetchCsrfToken()
   }, [])
 
+  //signup
   const handleSignUpClick = () => {
     setIsSignUpMode(true)
     setSignInData({ username: "", password: "" })
   }
 
+  //signin
   const handleSignInClick = () => {
     setIsSignUpMode(false)
     setSignUpData({ username: "", email: "", password: "", confirm_password: "" })
@@ -34,6 +36,7 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
     }
   }
 
+  //handle signin
   const handleSignInSubmit = async (e) => {
     e.preventDefault()
     if (!signInData.username || !signInData.password) {
@@ -46,30 +49,28 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
       localStorage.setItem("accessToken", response.data.access)
       localStorage.setItem("refreshToken", response.data.refresh)
       setIsAuthenticated(true)
-       // Show success toast
-
        console.log("Showing toast...");
+       //success toast
       toast.success("Login Successful!", {
         position: "top-center",
-        autoClose: 2000, // Close after 2 seconds
+        autoClose: 2000, 
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
       });
-
-      // Redirect to home page after toast closes
       setTimeout(() => {
         navigate("/home");
       }, 2000);
-
+//error toast:
       if (onSuccess) onSuccess();
     } catch (error) {
       alert("Login Failed: " + (error.response?.data?.message || "Server error"));
     }
   };
 
+  //handle signup
   const handleSignUpSubmit = async (e) => {
     e.preventDefault();
     if (!signUpData.username || !signUpData.email || !signUpData.password || !signUpData.confirm_password) {
@@ -82,9 +83,7 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
     }
     try {
       const response = await axiosInstance.post("/users/register/", signUpData);
-      console.log("Sign-Up Response:", response.data); // Use the response variable
-  
-      // Show success toast
+      console.log("Sign-Up Response:", response.data); 
       toast.success("Sign-Up Successful!", {
         position: "top-center",
         autoClose: 2000,
@@ -96,15 +95,13 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
       });
   
       setIsAuthenticated(true);
-  
-      // Redirect to home page after toast closes
       setTimeout(() => {
         navigate("/home");
       }, 2000);
-  
+  //success:
       if (onSuccess) onSuccess();
-    } catch (error) {
-      // Show error toast if sign-up fails
+    } //error:
+    catch (error) {
       toast.error("Sign-Up Failed: " + (error.response?.data?.message || "Server error"), {
         position: "top-center",
         autoClose: 2000,
@@ -119,12 +116,12 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
 
   return (
     <div className="signin-signup-page">
-      {/* Toast Container */}
+     
       <ToastContainer />
     <div className={`container ${isSignUpMode ? "sign-up-mode" : ""}`}>
       <div className="forms-container">
         <div className="signin-signup">
-          {/* Sign-In Form */}
+      
           <form className="sign-in-form" onSubmit={handleSignInSubmit}>
             <h2 className="title">Sign In</h2>
             <div className="input-field">
@@ -152,7 +149,6 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
             <input type="submit" value="Login" className="btn solid" />
           </form>
 
-          {/* Sign-Up Form */}
           <form className="sign-up-form" onSubmit={handleSignUpSubmit}>
             <h2 className="title">Sign Up</h2>
             <div className="input-field">
@@ -205,7 +201,7 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
       </div>
 
       <div className="panels-container">
-  {/* Left Panel (Sign In Image) */}
+
   <div className="panel left-panel">
     <div className="content">
       <h3>New here?</h3>
@@ -214,13 +210,11 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
         Sign Up
       </button>
     </div>
-    {/* Show Sign In image only when isSignUpMode is false */}
     {!isSignUpMode && (
       <img src="/images/login.png" className="image panel-image" alt="Sign In" />
     )}
   </div>
 
-  {/* Right Panel (Sign Up Image) */}
   <div className="panel right-panel">
     <div className="content">
       <h3>Already a user?</h3>
@@ -229,7 +223,6 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
         Sign In
       </button>
     </div>
-    {/* Show Sign Up image only when isSignUpMode is true */}
     {isSignUpMode && (
       <img src="/images/register.png" className="image panel-image" alt="Sign Up" />
     )}

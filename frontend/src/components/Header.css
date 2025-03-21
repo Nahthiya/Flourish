@@ -1,40 +1,44 @@
-/* Header container */
 .header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  background: transparent; /* Fully transparent */
+  background: transparent; 
   color: white;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; 
   align-items: center;
-  height: 120px; /* Adjust as needed */
-  padding: 20px 20px; /* Reduced padding */
+  height: 120px; 
+  padding: 20px 20px;
   z-index: 1000;
-  box-sizing: border-box; /* Ensure padding is included in width */
+  box-sizing: border-box; 
   font-family: "Aboreto", serif;
 }
 
-/* Logo */
 .logo {
-  height: 80px; /* Reduced size */
-  max-width: 150px; /* Reduced size */
-  margin-top: 20px; /* Adjusted margin */
-  margin-left: 10px; /* Adjusted margin */
+  height: 80px;
+  max-width: 150px; 
+  margin-left: 10px; 
 }
 
-/* Navigation links */
+.header-center {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 .nav-links {
   display: flex;
-  gap: 15px; /* Reduced gap */
-  flex-wrap: wrap; /* Allow links to wrap on smaller screens */
+  gap: 15px; 
+  flex-wrap: wrap; 
 }
 
 .nav-links a {
   color: black;
   text-decoration: none;
-  font-size: 14px; /* Reduced font size */
+  font-size: 14px; 
   font-weight: 500;
   transition: opacity 0.3s ease-in-out;
 }
@@ -43,68 +47,129 @@
   opacity: 0.7;
 }
 
-/* Sign In / Sign Up button */
+.logout-container {
+  display: flex;
+  align-items: center;
+}
+
 .sign-button {
   background: white;
-  color: #644260; /* Updated color */
+  color: #644260; 
   border: none;
-  padding: 10px 20px; /* Reduced padding */
-  font-size: 14px; /* Reduced font size */
+  padding: 10px 20px; 
+  font-size: 14px; 
   font-weight: bold;
-  border-radius: 50px; /* Curved button */
+  border-radius: 50px; 
   cursor: pointer;
   transition: background 0.3s ease-in-out;
 }
 
 .sign-button:hover {
-  background: #b8a7b1; /* Updated hover color */
-  color: #fff; /* Updated text color on hover */
+  background: #b8a7b1; 
+  color: #fff; 
 }
 
-/* Responsive Design */
+.logout-button {
+  display: flex;
+  align-items: center;
+  background: white; 
+  color: #644260; 
+  border: none;
+  padding: 10px 20px; 
+  font-size: 14px; 
+  font-weight: bold;
+  border-radius: 50px; 
+  cursor: pointer;
+  font-family: "Aboreto", serif; 
+  transition: background 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.logout-button:hover {
+  background: #b8a7b1;
+  color: #fff; 
+  transform: scale(1.05); 
+}
+
+.logout-button svg {
+  margin-left: 8px; 
+  width: 18px; 
+  height: 18px;
+}
+
 @media (max-width: 768px) {
   .header {
-    padding: 10px 10px; /* Further reduced padding */
-    height: 100px; /* Reduced height */
+    padding: 10px 10px; 
+    height: 100px; 
   }
 
   .logo {
-    height: 60px; /* Further reduced size */
-    max-width: 120px; /* Further reduced size */
-    margin-top: 10px; /* Adjusted margin */
-    margin-left: 5px; /* Adjusted margin */
+    height: 60px; 
+    max-width: 120px; 
+    margin-left: 5px; 
   }
 
   .nav-links {
-    gap: 10px; /* Further reduced gap */
+    gap: 10px; 
   }
 
   .nav-links a {
-    font-size: 12px; /* Further reduced font size */
+    font-size: 12px; 
   }
 
   .sign-button {
-    padding: 8px 16px; /* Further reduced padding */
-    font-size: 12px; /* Further reduced font size */
+    padding: 8px 16px; 
+    font-size: 12px; 
+  }
+
+  .logout-button {
+    padding: 8px 16px; 
+    font-size: 12px; 
+  }
+
+  .logout-button svg {
+    width: 16px;
+    height: 16px;
   }
 }
 
 @media (max-width: 480px) {
   .header {
-    flex-direction: column; /* Stack logo, links, and button vertically */
-    height: auto; /* Auto height for stacked layout */
-    padding: 10px; /* Reduced padding */
+    flex-direction: column; 
+    height: auto; 
+    padding: 10px; 
+  }
+
+  .header-center {
+    position: static; 
+    transform: none;
+    margin: 10px 0; 
   }
 
   .logo {
-    margin: 10px 0; /* Adjusted margin */
+    margin: 10px 0; 
   }
 
   .nav-links {
-    margin: 10px 0; /* Adjusted margin */
+    margin: 10px 0;
+    justify-content: center; 
+  }
+
+  .logout-container {
+    margin: 10px 0; 
   }
 
   .sign-button {
-    margin: 10px 0; /* Adjusted margin */
+    padding: 8px 16px;
+    font-size: 12px; 
+  }
+
+  .logout-button {
+    padding: 8px 16px; 
+    font-size: 12px; 
+  }
+
+  .logout-button svg {
+    width: 16px; 
+    height: 16px;
   }
 }

@@ -1,10 +1,9 @@
-/* Import Google Fonts and Icons */
+
 @import url("https://fonts.googleapis.com/css2?family=Lato&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200");
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css");
 
-/* General Page Styles */
 .home-page {
   background-color: white;
   min-height: 100vh;
@@ -12,7 +11,6 @@
   color: black;
 }
 
-/* Main Content - Ensure it starts below the header */
 .main-content {
   padding-top: 100px;
   max-width: 1200px;
@@ -21,7 +19,6 @@
   padding-right: 2rem;
 }
 
-/* Welcome Section */
 .welcome-section {
   text-align: center;
   padding: 2rem 1rem 3rem;
@@ -53,7 +50,6 @@
   }
 }
 
-/* Slideshow Section */
 .slideshow-section {
   margin-bottom: 4rem;
 }
@@ -126,8 +122,6 @@
   transform: scale(1.05);
 }
 
-
-/* Quick Stats Section */
 .stats-section {
   margin-bottom: 4rem;
 }
@@ -244,7 +238,6 @@
   height: 1rem;
 }
 
-/* Feature Cards */
 .features-section {
   margin-bottom: 4rem;
 }
@@ -271,8 +264,8 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  text-decoration: none; /* Remove underline from Link */
-  color: inherit; /* Inherit text color */
+  text-decoration: none; 
+  color: inherit; 
 }
 
 .feature-card:hover {
@@ -365,7 +358,6 @@
   background: #6a5039;
 }
 
-/* Responsive Adjustments */
 @media (max-width: 768px) {
   .main-content {
     padding-left: 1rem;
@@ -412,18 +404,18 @@
 }
 
 .stats-link {
-  color: #5d2510; /* Match your theme color */
+  color: #5d2510; 
   text-decoration: none;
   font-weight: bold;
   cursor: pointer;
 }
 
 .stats-link:hover {
-  color: #412f26; /* Darker shade for hover */
+  color: #412f26; 
 }
 
 .new-user-prompt {
-  color: #806044; /* Match your theme color */
+  color: #806044; 
   font-weight: bold;
   display: block;
   margin-bottom: 10px;

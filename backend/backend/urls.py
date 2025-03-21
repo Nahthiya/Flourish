@@ -7,10 +7,10 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = [
-    path('admin/', admin.site.urls),  # Django admin
-    path('api/users/', include('users.urls')),  # API routes for user-related views
-    path('accounts/', include('allauth.urls')),  # Django-AllAuth for social login
-    path('', TemplateView.as_view(template_name="index.html")),  # Serve React app's entry point
+    path('admin/', admin.site.urls),  
+    path('api/users/', include('users.urls')),  
+    path('accounts/', include('allauth.urls')),  
+    path('', TemplateView.as_view(template_name="index.html")), 
     path('api/chatbot/', chatbot_response, name='chatbot'),
     path('api/csrf-token/', get_csrf_token, name='csrf-token'),
     path('users/auth-status/', AuthStatusView.as_view(), name='auth-status'),

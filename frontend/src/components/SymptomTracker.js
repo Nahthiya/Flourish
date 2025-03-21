@@ -14,6 +14,7 @@ function SymptomTracker({ onSymptomsLogged, onClose, selectedDate: initialDate }
         "Acne", "Back Pain", "Food Cravings", "Insomnia"
     ];
 
+    //fetch symptoms
     const fetchLoggedSymptoms = useCallback(async () => {
         try {
             const response = await axiosInstance.get("/users/symptom-logs/");
@@ -28,12 +29,14 @@ function SymptomTracker({ onSymptomsLogged, onClose, selectedDate: initialDate }
         fetchLoggedSymptoms();
     }, [fetchLoggedSymptoms]);
 
+    //handle symptoms
     const handleSymptomToggle = (symptom) => {
         setSelectedSymptoms((prev) =>
             prev.includes(symptom) ? prev.filter((s) => s !== symptom) : [...prev, symptom]
         );
     };
 
+    //save 
     const handleSaveSymptoms = async () => {
         if (selectedSymptoms.length === 0) {
             alert("Please select at least one symptom.");
@@ -55,7 +58,7 @@ function SymptomTracker({ onSymptomsLogged, onClose, selectedDate: initialDate }
             });
             console.log("Response from server:", response.data);
             if (onSymptomsLogged) {
-                // Check if this was an update (combined_symptoms exists) or a new entry
+            
                 const loggedSymptoms = response.data.combined_symptoms
                     ? { date: payload.date, symptoms: response.data.combined_symptoms, cycle_day: response.data.cycle_day }
                     : { date: payload.date, symptoms: payload.symptoms, cycle_day: response.data.cycle_day };
@@ -63,7 +66,7 @@ function SymptomTracker({ onSymptomsLogged, onClose, selectedDate: initialDate }
             }
             if (onClose) onClose();
             setSelectedSymptoms([]);
-            fetchLoggedSymptoms(); // Refresh the list to show the updated entry
+            fetchLoggedSymptoms(); 
         } catch (error) {
             console.error("Error saving symptoms:", error.response ? error.response.data : error);
         }

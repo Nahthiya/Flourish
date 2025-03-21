@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosInstance';
-import { Link } from 'react-router-dom'; // Import Link for navigation
+import { Link } from 'react-router-dom'; 
 import "./HomePage.css";
 
 const HomePage = () => {
@@ -11,7 +11,7 @@ const HomePage = () => {
   const [chatHistory, setChatHistory] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Static slideshow images
+  //slideshow images
   const slides = [
     {
       image: "/images/hs1.png",
@@ -24,7 +24,7 @@ const HomePage = () => {
     }
   ];
 
-  // Auto-scroll functionality for slideshow
+  // Auto-scroll for slideshow
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % slides.length);
@@ -33,7 +33,7 @@ const HomePage = () => {
     return () => clearInterval(interval);
   }, [slides.length]);
 
-  // Handle manual navigation for slideshow
+  // manual navigation for slideshow
   const goToNextSlide = () => {
     setCurrentSlide((prevSlide) => (prevSlide + 1) % slides.length);
   };
@@ -52,7 +52,7 @@ const HomePage = () => {
         console.error("Error fetching user data:", error);
       });
 
-    // Fetch period tracker data
+    //period tracker data
     axiosInstance.get('users/predict-cycle/')
       .then(response => {
         setPeriodData(response.data);
@@ -61,10 +61,10 @@ const HomePage = () => {
         console.error("Error fetching period data:", error);
       });
 
-    // Fetch chatbot conversation history
+    // chatbot conversation history
     axiosInstance.get('users/get-chat-history/')
       .then(response => {
-        setChatHistory(response.data.chats[0]); // Assuming the latest chat is the first one
+        setChatHistory(response.data.chats[0]); 
       })
       .catch(error => {
         console.error("Error fetching chat history:", error);
@@ -73,9 +73,7 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
-      {/* Main Content */}
       <main className="main-content">
-        {/* Welcome Section */}
         <section className="welcome-section">
           <h2 className="welcome-heading">Welcome back, {user?.username}!</h2>
           <p className="welcome-text">
@@ -88,8 +86,6 @@ const HomePage = () => {
   <a href="#stats-section" className="stats-link">View your stats below</a> and explore our features!
 </p>
         </section>
-
-        {/* Slideshow Section */}
         <section className="slideshow-section">
           <div className="slideshow">
             <div className="slides">
@@ -102,8 +98,6 @@ const HomePage = () => {
                 </div>
               ))}
             </div>
-
-            {/* Navigation Dots */}
             <div className="slideshow-dots">
               {slides.map((_, index) => (
                 <span
@@ -113,8 +107,6 @@ const HomePage = () => {
                 />
               ))}
             </div>
-
-            {/* Navigation Arrows */}
             <button className="slide-arrow left" onClick={goToPrevSlide}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -139,12 +131,9 @@ const HomePage = () => {
             </button>
           </div>
         </section>
-
-        {/* Quick Stats Section */}
 <section className="stats-section" id="stats-section">
   <h2 className="section-heading">Your Wellness Overview</h2>
   <div className="stats-grid">
-    {/* Period Tracker Card */}
     <div className="stat-card period-card">
       <div className="stat-header">
         <span className="material-symbols-outlined">calendar_month</span>
@@ -167,7 +156,6 @@ const HomePage = () => {
           style={{ width: `${periodData?.cycle_progress || 0}%` }}
         ></div>
       </div>
-      {/* Link to Period Tracker */}
       <button className="continue-button" onClick={() => navigate('/tracker')}>
   Go to Period Tracker
   <svg
@@ -186,8 +174,6 @@ const HomePage = () => {
   </svg>
 </button>
     </div>
-
-    {/* Recent Conversation Card */}
     <div className="stat-card chat-card">
       <div className="stat-header">
         <span className="material-symbols-outlined">forum</span>
@@ -220,11 +206,10 @@ const HomePage = () => {
   </div>
 </section>
 
-        {/* Feature Cards */}
         <section className="features-section">
           <h2 className="section-heading">Explore Flourish Features</h2>
           <div className="features-grid">
-            {/* Card 1: Chatbot */}
+      
             <Link to="/chatbot" className="feature-card">
               <div className="feature-icon chatbot-icon">
                 <span className="material-symbols-outlined">chat</span>
@@ -238,7 +223,6 @@ const HomePage = () => {
               </div>
             </Link>
 
-            {/* Card 2: Period Tracker */}
             <Link to="/tracker" className="feature-card">
               <div className="feature-icon tracker-icon">
                 <span className="material-symbols-outlined">calendar_today</span>
@@ -252,7 +236,6 @@ const HomePage = () => {
               </div>
             </Link>
 
-            {/* Card 3: Resource Hub */}
             <Link to="/hub" className="feature-card">
               <div className="feature-icon hub-icon">
                 <span className="material-symbols-outlined">hub</span>

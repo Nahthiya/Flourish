@@ -6,7 +6,7 @@ function SignInSignUpPage({ setIsAuthenticated }) {
   const navigate = useNavigate();
 
   const handleSuccess = () => {
-    navigate('/home'); // Navigate to home on success
+    navigate('/home'); 
   };
 
   return (

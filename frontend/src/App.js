@@ -10,8 +10,8 @@ import ProtectedRoute from './utils/ProtectedRoute';
 import ChatbotPage from './pages/ChatbotPage';
 import HubPage from './pages/HubPage';
 import axiosInstance from './axiosInstance';
-import { ToastContainer } from 'react-toastify'; // Import ToastContainer
-import 'react-toastify/dist/ReactToastify.css'; // Import CSS
+import { ToastContainer } from 'react-toastify'; 
+import 'react-toastify/dist/ReactToastify.css'; 
 import './App.css'; 
 
 window.process = {
@@ -23,16 +23,16 @@ window.process = {
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Service worker cleanup
+  // service worker cleanup
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(registrations => {
         registrations.forEach(registration => registration.unregister());
       }).catch(err => console.error('ServiceWorker unregistration failed:', err));
     }
-  }, []);  // Empty dependency array = runs once on mount
+  }, []);  // empty dependency array - runs once on mount
 
-  // Authentication check
+  // authentication check
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
     setIsAuthenticated(!!token);
@@ -52,17 +52,16 @@ function App() {
   return (
     <Router>
       <div className="App">
-        {/* Add ToastContainer here */}
         <ToastContainer
-          position="top-center" // Position of the toast
-          autoClose={2000} // Auto-close after 2 seconds
-          hideProgressBar={false} // Show progress bar
-          newestOnTop={false} // New toasts appear below older ones
-          closeOnClick // Close toast on click
-          rtl={false} // Left-to-right layout
-          pauseOnFocusLoss // Pause toast when window loses focus
-          draggable // Allow dragging to dismiss
-          pauseOnHover // Pause toast on hover
+          position="top-center" 
+          autoClose={2000} 
+          hideProgressBar={false} 
+          newestOnTop={false} 
+          closeOnClick 
+          rtl={false} 
+          pauseOnFocusLoss 
+          draggable 
+          pauseOnHover 
         />
         <Header isAuthenticated={isAuthenticated} onLogout={handleLogout} />
         <Routes>

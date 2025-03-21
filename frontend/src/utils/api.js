@@ -2,12 +2,12 @@ import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8000/api/users";
 
-let csrfToken = null; // ✅ Store CSRF token globally
+let csrfToken = null; 
 
-// ✅ Function to get stored authentication token
+//get stored authentication token
 const getAuthHeaders = () => {
-    const token = localStorage.getItem("accessToken"); // ✅ Use correct key
-    console.log("Access Token Found:", token); // Debugging log
+    const token = localStorage.getItem("accessToken"); 
+    console.log("Access Token Found:", token); 
     if (!token) {
         console.warn("No access token found, skipping API call.");
         return null;
@@ -16,7 +16,7 @@ const getAuthHeaders = () => {
 };
 
 
-// ✅ Function to fetch CSRF token (only fetches once)
+//fetch CSRF token 
 export const getCsrfToken = async () => {
     if (csrfToken) return csrfToken;
 
@@ -30,10 +30,10 @@ export const getCsrfToken = async () => {
     }
 };
 
-// ✅ Fetch articles with authentication & CSRF protection
+// fetch articles with authentication & CSRF protection
 export const fetchArticles = async (category = "", search = "") => {
     const headers = getAuthHeaders();
-    if (!headers) return []; // ✅ Skip API call if user is not logged in
+    if (!headers) return []; // skip API call if user is not logged in
 
     try {
         csrfToken = await getCsrfToken();
@@ -49,10 +49,10 @@ export const fetchArticles = async (category = "", search = "") => {
     }
 };
 
-// ✅ Fetch categories with authentication & CSRF protection
+// fetch categories with authentication & CSRF protection
 export const fetchCategories = async () => {
     const headers = getAuthHeaders();
-    if (!headers) return []; // ✅ Skip API call if user is not logged in
+    if (!headers) return []; //
 
     try {
         csrfToken = await getCsrfToken();

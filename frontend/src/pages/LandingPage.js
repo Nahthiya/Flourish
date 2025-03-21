@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './LandingPage.css';
 
-// Image Slideshow Component
+// Slideshow Component
 const Slideshow = () => {
   const images = [
     "/images/s1.png",
@@ -21,7 +21,7 @@ const Slideshow = () => {
     }, 5000);
   
     return () => clearInterval(interval);
-  }, [images.length]); // ✅ Fix: Added images.length as a dependency  
+  }, [images.length]); 
 
   return (
     <div className="slideshow">
@@ -34,8 +34,6 @@ const Slideshow = () => {
           />
         ))}
       </div>
-
-      {/* Navigation Dots */}
       <div className="slideshow-dots">
         {images.map((_, index) => (
           <span
@@ -49,7 +47,6 @@ const Slideshow = () => {
   );
 };
 
-// Feature Cards
 const FeatureCard = ({ title, description, icon, linkText, linkPath }) => {
   return (
     <div className="feature-card">
@@ -64,10 +61,7 @@ const FeatureCard = ({ title, description, icon, linkText, linkPath }) => {
 function LandingPage() {
   return (
     <div className="landing-page">
-      {/* Slideshow at the Top */}
       <Slideshow />
-
-      {/* Features Section */}
       <section className="features">
         <h1>What Can You Do with Flourish?</h1>
         <div className="feature-grid">
@@ -101,8 +95,6 @@ function LandingPage() {
           />
         </div>
       </section>
-
-      {/* Why Choose Flourish Section */}
       <section className="why-choose">
         <div className="why-choose-container">
           <div className="why-choose-image">
@@ -120,8 +112,6 @@ function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* How It Works Section */}
       <section className="how-it-works">
         <h2>How It Works:</h2>
         <div className="how-it-works-grid">
@@ -147,7 +137,6 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* Final CTA Section */}
 <section className="cta-section">
   <h2><b>Your Well-Being Starts Today!</b></h2>
   <p><b>Take control of your health, explore expert-backed content, and track your journey with confidence.</b></p>

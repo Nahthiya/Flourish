@@ -1,20 +1,19 @@
 import axios from "axios";
 
-// Get API URL from environment variable (fallback to localhost)
+// get API URL from environment variable
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000/api";
 
 let csrfToken = null; 
 
-// Function to dynamically fetch CSRF token and store it in cookies
+// function to dynamically fetch CSRF token and store it in cookies
 const fetchCsrfToken = async () => {
-    if (csrfToken) return csrfToken; // Avoid fetching multiple times
-
+    if (csrfToken) return csrfToken; 
     try {
         const response = await axios.get(`${API_URL}/users/csrf-token/`, {
-            withCredentials: true, // Important to include cookies
+            withCredentials: true, 
         });
 
-        csrfToken = response.data.csrfToken || response.data.token; // Store token
+        csrfToken = response.data.csrfToken || response.data.token; // store token
         if (csrfToken) {
             document.cookie = `csrftoken=${csrfToken}; path=/; SameSite=Lax`;
             console.log("CSRF token stored successfully:", csrfToken);
@@ -28,7 +27,7 @@ const fetchCsrfToken = async () => {
         return null;
     }
 };
-//Refresh token
+// refresh token
 const refreshToken = async () => {
     const refreshToken = localStorage.getItem("refreshToken");
     if (!refreshToken) {
@@ -55,20 +54,20 @@ const refreshToken = async () => {
     }
 };
 
-// Create Axios instance
+// create Axios instance
 const axiosInstance = axios.create({
     baseURL: API_URL,
     headers: {
         "Content-Type": "application/json",
     },
-    withCredentials: true, // Allow cookies to be sent with requests
+    withCredentials: true, 
 });
 
-// Request Interceptor: Ensure CSRF and Authorization tokens are included
+// request interceptor to ensure CSRF and Authorization tokens are included
 axiosInstance.interceptors.request.use(
     async (config) => {
         console.log('Axios Request Config:', config.url, config.headers);
-        // Ensure CSRF token is fetched before making API requests
+       
         if (!csrfToken) {
             console.log("Fetching CSRF token...");
             csrfToken = await fetchCsrfToken();
@@ -91,24 +90,23 @@ axiosInstance.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Handle token refresh
+// response interceptor to handle token refresh
 axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
         
-        // If 401 error and not a retry attempt
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             
             const success = await refreshToken();
             if (success) {
-                // Retry original request with new token
+              
                 const newAccessToken = localStorage.getItem("accessToken");
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
                 return axiosInstance(originalRequest);
             } else {
-                // Redirect to login if refresh fails
+              
                 localStorage.removeItem("accessToken");
                 localStorage.removeItem("refreshToken");
                 window.location.href = "/signin-signup";
@@ -117,7 +115,7 @@ axiosInstance.interceptors.response.use(
         return Promise.reject(error);
     }
 );
-// Fetch CSRF token when the app loads (only once)
+// fetch CSRF token when the app loads 
 fetchCsrfToken();
 
 export { fetchCsrfToken };

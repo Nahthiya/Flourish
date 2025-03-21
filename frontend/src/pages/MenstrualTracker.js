@@ -33,6 +33,7 @@ function MenstrualTracker() {
     const [calendarDate, setCalendarDate] = useState(new Date());
     const [selectedDateSymptoms, setSelectedDateSymptoms] = useState(null);
 
+    //fetch user
     useEffect(() => {
         const fetchUsername = async () => {
             try {
@@ -60,6 +61,7 @@ function MenstrualTracker() {
         };
     }, []);
 
+    //fetch data
     const fetchData = async () => {
         try {
             const response = await axiosInstance.get("/users/menstrual-data/");
@@ -69,6 +71,7 @@ function MenstrualTracker() {
         }
     };
 
+    //fetch symptoms
     const fetchSymptoms = async () => {
         try {
             const response = await axiosInstance.get("/users/symptom-logs/");
@@ -78,6 +81,7 @@ function MenstrualTracker() {
         }
     };
 
+    //predictions
     const fetchPredictions = async () => {
         try {
             const response = await axiosInstance.get("/users/predict-cycle/");
@@ -87,11 +91,13 @@ function MenstrualTracker() {
         }
     };
 
+    //after logging symptoms
     const handleSymptomsLogged = (newLogs) => {
         setSymptomLogs((prev) => [...prev, ...newLogs]);
         toast.success("Symptoms logged successfully");
     };
 
+    //hide on escape
     const hideOnEscape = (e) => {
         if (e.key === "Escape") {
             setOpen(false);
@@ -104,6 +110,7 @@ function MenstrualTracker() {
         if (refOne.current && !refOne.current.contains(e.target)) setOpen(false);
     };
 
+    //save period
     const handleSavePeriod = async () => {
         setLoading(true);
         const startDate = selectedRange[0].startDate;
@@ -128,38 +135,39 @@ function MenstrualTracker() {
         }
     };
 
+    //marked dates
     const getMarkedDates = () => {
         let markedDates = {};
         
-        // Mark past period dates
+        //past period dates
         menstrualData.forEach((entry) => {
             let currentDate = parseISO(entry.start_date);
             const endDate = parseISO(entry.end_date);
             while (currentDate <= endDate) {
                 const formattedDate = format(currentDate, "yyyy-MM-dd");
-                markedDates[formattedDate] = markedDates[formattedDate] || []; // Initialize as array if not set
-                markedDates[formattedDate].push("past-period"); // Add past-period state
+                markedDates[formattedDate] = markedDates[formattedDate] || []; 
+                markedDates[formattedDate].push("past-period"); 
                 currentDate = addDays(currentDate, 1);
             }
         });
     
-        // Mark predicted period dates
+        //predicted period dates
         if (predictions?.next_period_start) {
             let currentDate = parseISO(predictions.next_period_start);
             const endDate = parseISO(predictions.next_period_end);
             while (currentDate <= endDate) {
                 const formattedDate = format(currentDate, "yyyy-MM-dd");
-                markedDates[formattedDate] = markedDates[formattedDate] || []; // Initialize as array if not set
-                markedDates[formattedDate].push("predicted-period"); // Add predicted-period state
+                markedDates[formattedDate] = markedDates[formattedDate] || []; 
+                markedDates[formattedDate].push("predicted-period"); 
                 currentDate = addDays(currentDate, 1);
             }
         }
     
-        // Mark symptom-logged dates
+        //symptom-logged dates
         symptomLogs.forEach((entry) => {
             const formattedDate = entry.date;
-            markedDates[formattedDate] = markedDates[formattedDate] || []; // Initialize as array if not set
-            markedDates[formattedDate].push("symptom-logged"); // Add symptom-logged state
+            markedDates[formattedDate] = markedDates[formattedDate] || []; 
+            markedDates[formattedDate].push("symptom-logged"); 
         });
     
         return markedDates;
@@ -169,56 +177,52 @@ function MenstrualTracker() {
 
     const [chartData, setChartData] = useState({ cycle: null, period: null });
 
-    useEffect(() => {
-        if (menstrualData.length > 1) {
-            const lastCycles = menstrualData.slice(-6);
-            const labels = lastCycles.map((entry) => format(parseISO(entry.start_date), "MMM dd"));
-            const cycleData = lastCycles.map((entry, index) => {
-                if (index === 0) return null;
-                const prevEntry = lastCycles[index - 1];
-                return differenceInDays(parseISO(entry.start_date), parseISO(prevEntry.start_date));
-            });
-            const periodData = lastCycles.map((entry) => entry.period_length);
-
-            setChartData({
-                cycle: {
-                    labels: labels.slice(1),
-                    datasets: [{
-                        label: "Cycle Length (Days)",
-                        data: cycleData.slice(1),
-                        borderColor: "#ff6384",
-                        backgroundColor: "rgba(255, 99, 132, 0.2)",
-                        tension: 0.3,
-                        fill: true,
-                    }],
-                },
-                period: {
-                    labels,
-                    datasets: [
-                        {
-                            label: "Period Length (Background)",
-                            data: periodData,
-                            backgroundColor: "#e6f0fa", // Very light blue
-                            barThickness: 40, // Thick bars
-                            borderWidth: 0,
-                            categoryPercentage: 0.8, // Control the width of the category (shared by both bars)
-                            barPercentage: 1.0, // Ensure the bar takes up the full category width
-                            borderWidth: 0,
-                        },
-                        {
-                            label: "Period Length (Overlay)",
-                            data: periodData,
-                            backgroundColor: "#addbfa", // Slightly darker blue
-                            barThickness: 20, // Thinner bars
-                            categoryPercentage: 0.8, // Match the background bar’s category width
-                            barPercentage: 0.5, // Make the bar take up 50% of the category width (centers it)
-                            borderWidth: 0,
-                        },
-                    ],
-                },
-            });
-        }
-    }, [menstrualData]);
+// charts
+useEffect(() => {
+    if (menstrualData.length > 1) {
+      const lastCycles = menstrualData.slice(-6);
+      const labels = lastCycles.map((entry) => format(parseISO(entry.start_date), "MMM dd"));
+      const cycleData = lastCycles.map((entry, index) => {
+        if (index === 0) return null;
+        const prevEntry = lastCycles[index - 1];
+        return differenceInDays(parseISO(entry.start_date), parseISO(prevEntry.start_date));
+      });
+      const periodData = lastCycles.map((entry) => entry.period_length);
+  
+      setChartData({
+        cycle: {
+          labels: labels.slice(1),
+          datasets: [{
+            label: "Cycle Length (Days)",
+            data: cycleData.slice(1),
+            borderColor: "#ff6384",
+            backgroundColor: "rgba(255, 99, 132, 0.2)",
+            tension: 0.3,
+            fill: true,
+          }],
+        },
+        period: {
+          labels,
+          datasets: [
+            {
+              label: "Period Length (Background)",
+              data: periodData,
+              backgroundColor: "#e6f0fa",
+              barThickness: 40,
+              borderWidth: 0, 
+            },
+            {
+              label: "Period Length (Overlay)",
+              data: periodData,
+              backgroundColor: "#addbfa",
+              barThickness: 20,
+              borderWidth: 0, 
+            },
+          ],
+        },
+      });
+    }
+  }, [menstrualData]);
 
     const cycleOptions = {
         responsive: true,
@@ -269,7 +273,7 @@ function MenstrualTracker() {
             },
         },
         plugins: {
-            legend: { display: false }, // Hide legend since it’s a layered effect
+            legend: { display: false }, 
             tooltip: {
                 enabled: true,
                 callbacks: {
@@ -279,11 +283,12 @@ function MenstrualTracker() {
         },
         elements: {
             bar: {
-                borderRadius: 5, // Rounded edges
+                borderRadius: 5, 
             },
         },
     };
 
+    //avg period and cycle
     const calculateAverages = () => {
         const cycleLengths = menstrualData.map((entry) => entry.cycle_length).filter(Boolean);
         const periodLengths = menstrualData.map((entry) => entry.period_length).filter(Boolean);
@@ -298,33 +303,31 @@ function MenstrualTracker() {
 
     const { avgCycleLength, avgPeriodLength } = calculateAverages();
 
+    //recent symptoms
     const getRecentSymptoms = () => {
         const recentLogs = symptomLogs.slice(0, 5);
         const symptoms = recentLogs.flatMap(log => log.symptoms);
         return [...new Set(symptoms)].slice(0, 5);
     };
-
-// Calculate current cycle day (days since the start of the most recent period)
+// last period
 const latestPeriod = menstrualData.length > 0 ? menstrualData[menstrualData.length - 1] : null;
 const rawCycleDay = latestPeriod
     ? differenceInDays(new Date(), parseISO(latestPeriod.start_date)) + 1
     : "N/A";
-
-    // Calculate days remaining for the next period
+//days remaining for next period
     const daysRemaining = predictions?.next_period_start
         ? differenceInDays(parseISO(predictions.next_period_start), new Date())
         : "N/A";
-
-    // Adjust average cycle length for phase calculations
+//avg cycle length
 const avgCycleLengthCalc = menstrualData.length
     ? menstrualData.reduce((sum, entry) => sum + (entry.cycle_length || 28), 0) / menstrualData.length
     : 28;
-
-// Cap the cycle day at the average cycle length if the predicted next period has passed
+//current cycle day
 const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && daysRemaining < 0
-    ? rawCycleDay % avgCycleLengthCalc || avgCycleLengthCalc // Reset cycle day to within the cycle length
+    ? rawCycleDay % avgCycleLengthCalc || avgCycleLengthCalc 
     : rawCycleDay;
 
+    //cal phase
     const getCyclePhase = (cycleDay, cycleLength) => {
         const phases = [
             { name: "Menstrual", start: 1, end: 5, color: "#ff6384" },
@@ -333,7 +336,7 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
             { name: "Luteal", start: Math.floor(cycleLength / 2) + 4, end: cycleLength, color: "#ae9dd5" },
         ];
         if (cycleDay <= 0 || !cycleDay || typeof cycleDay === "string") return { name: "Unknown", color: "#ccc" };
-        // Adjust cycle day to loop within the cycle length
+       
         const adjustedCycleDay = cycleDay > cycleLength ? cycleDay % cycleLength || cycleLength : cycleDay;
         for (const phase of phases) {
             if (adjustedCycleDay >= phase.start && adjustedCycleDay <= phase.end) return phase;
@@ -343,6 +346,7 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
     
     const currentPhase = getCyclePhase(currentCycleDay, avgCycleLengthCalc);
 
+    //pdf 
     const handleDownloadPDF = async () => {
         setLoading(true);
         try {
@@ -353,16 +357,13 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
                 },
             };
     
-            // Fetch user data
             const userResponse = await axiosInstance.get("/users/users/auth-status/", config);
             const userName = userResponse.data.username || "User";
     
-            // Fetch report data
             console.log("Fetching report with token:", token);
             const response = await axiosInstance.get("/users/symptom-report/", config);
             console.log("Fetched report data:", response.data);
     
-            // Initialize jsPDF
             const pdf = new jsPDF({
                 orientation: "portrait",
                 unit: "pt",
@@ -371,44 +372,38 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
     
             const pageWidth = pdf.internal.pageSize.getWidth();
             const pageHeight = pdf.internal.pageSize.getHeight();
-            const margin = 80; // Increased top margin to 80 points
+            const margin = 80; 
             let yPosition = margin;
     
-            // Function to add a new page if content exceeds page height
             const addNewPageIfNeeded = () => {
                 if (yPosition + 40 > pageHeight - margin) {
                     pdf.addPage();
-                    yPosition = margin; // Reset yPosition to top of new page
+                    yPosition = margin; 
                 }
             };
     
-            // Function to ensure heading and table stay together
             const ensureHeadingAndTableFit = (headingText, tableData, columnWidths, tableX) => {
-                const headingHeight = 30; // Approximate height for heading (16pt font + padding)
-                const headerRowHeight = 20; // Height of header row
-                const dataRowHeight = 25; // Height of each data row
-                const padding = 20; // Additional padding between heading and table
+                const headingHeight = 30; 
+                const headerRowHeight = 20;
+                const dataRowHeight = 25; 
+                const padding = 20; 
     
-                // Estimate table height: header + max 6 rows (based on slice(-6)) + padding
-                const maxRows = Math.min(tableData.length, 6) + 1; // +1 for header row
+                const maxRows = Math.min(tableData.length, 6) + 1; 
                 const tableHeight = headerRowHeight + (maxRows - 1) * dataRowHeight + padding;
     
                 const totalHeight = headingHeight + tableHeight;
     
-                // Check if there’s enough space; if not, force a new page
                 if (yPosition + totalHeight > pageHeight - margin) {
                     pdf.addPage();
                     yPosition = margin;
                 }
             };
-    
-            // Set font and styles
+    //font and text 
             pdf.setFont("helvetica");
     
-            // Top Heading - Larger, Bold, Underlined
             pdf.setFontSize(20);
             pdf.setFont("helvetica", "bold");
-            pdf.setTextColor(0, 0, 0); // Black text for heading
+            pdf.setTextColor(0, 0, 0); 
             const headingText = "Menstrual Cycle and Symptom Report";
             const headingWidth = pdf.getTextWidth(headingText);
             pdf.text(headingText, pageWidth / 2, yPosition, { align: "center" });
@@ -419,20 +414,18 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
                 (pageWidth + headingWidth) / 2,
                 yPosition + 5
             );
-            yPosition += 60; // Increased space below heading
+            yPosition += 60; 
     
-            // Name and Date/Time - Left Aligned
             pdf.setFontSize(12);
             pdf.setFont("helvetica", "normal");
             pdf.text(`Prepared for: ${userName}`, margin, yPosition);
-            yPosition += 20; // Increased space
-    
+            yPosition += 20; 
+    //date time
             const today = new Date();
             const formattedDateTime = format(today, "MMMM d, yyyy, h:mm a");
             pdf.text(`Date Generated: ${formattedDateTime}`, margin, yPosition);
-            yPosition += 40; // Increased space after name and date
-    
-            // Insights - Center Aligned
+            yPosition += 40; 
+    //avg cycle length and period length
             pdf.setFontSize(14);
             pdf.setFont("helvetica", "bold");
             pdf.text(
@@ -441,9 +434,9 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
                 yPosition,
                 { align: "center" }
             );
-            yPosition += 60; // Increased space after insights
+            yPosition += 60; 
     
-            // Cycle Length Trends - Table
+            // table for cycle length trends
             pdf.setFontSize(16);
             pdf.setFont("helvetica", "bold");
             const cycleLengthData = [];
@@ -464,7 +457,7 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
             }
             ensureHeadingAndTableFit("Cycle Length Trends", cycleLengthData, [150, 150, 100], (pageWidth - 400) / 2);
             pdf.text("Cycle Length Trends", margin, yPosition);
-            yPosition += 30; // Increased space below section heading
+            yPosition += 30; 
             addNewPageIfNeeded();
     
             pdf.setFontSize(10);
@@ -486,44 +479,44 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
                 });
     
                 pdf.setLineWidth(0.3);
-                pdf.setDrawColor(224, 224, 224); // Light grey #e0e0e0 for borders
+                pdf.setDrawColor(224, 224, 224); 
     
-                // Table Header
+                // table header
                 const headers = ["Start Date", "End Date", "No. of Days"].map(header => header.toUpperCase());
                 const columnWidths = [150, 150, 100];
                 const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
                 const tableX = (pageWidth - tableWidth) / 2;
     
-                pdf.setFillColor(249, 242, 252); // Very very light purple #f9f2fc for header
-                pdf.setTextColor(0, 0, 0); // Black text for header
+                pdf.setFillColor(249, 242, 252); 
+                pdf.setTextColor(0, 0, 0);
                 headers.forEach((header, index) => {
-                    pdf.setFillColor(249, 242, 252); // Explicitly set light purple for each header cell
+                    pdf.setFillColor(249, 242, 252); 
                     pdf.rect(tableX + columnWidths.slice(0, index).reduce((a, b) => a + b, 0), yPosition, columnWidths[index], 20, "F");
                     pdf.rect(tableX + columnWidths.slice(0, index).reduce((a, b) => a + b, 0), yPosition, columnWidths[index], 20);
                     pdf.text(header, tableX + columnWidths.slice(0, index).reduce((a, b) => a + b, 0) + 5, yPosition + 15);
                 });
                 yPosition += 20;
     
-                // Table Rows
-                pdf.setFillColor(255, 255, 255); // White background for all rows
-                pdf.setTextColor(0, 0, 0); // Black text for readability
+                // table rows
+                pdf.setFillColor(255, 255, 255); 
+                pdf.setTextColor(0, 0, 0); 
                 tableData.forEach((row) => {
                     row.forEach((cell, colIndex) => {
-                        pdf.setFillColor(255, 255, 255); // Explicitly set white for each row cell
+                        pdf.setFillColor(255, 255, 255); 
                         pdf.rect(tableX + columnWidths.slice(0, colIndex).reduce((a, b) => a + b, 0), yPosition, columnWidths[colIndex], 20, "F"); // Fixed: replaced 'index' with 'colIndex'
                         pdf.rect(tableX + columnWidths.slice(0, colIndex).reduce((a, b) => a + b, 0), yPosition, columnWidths[colIndex], 20); // Fixed: replaced 'index' with 'colIndex'
                         pdf.text(cell, tableX + columnWidths.slice(0, colIndex).reduce((a, b) => a + b, 0) + 5, yPosition + 15);
                     });
-                    yPosition += 25; // Increased row spacing
+                    yPosition += 25; 
                     addNewPageIfNeeded();
                 });
             } else {
                 pdf.text("No cycle data available.", margin, yPosition);
                 yPosition += 20;
             }
-            yPosition += 40; // Reduced space after table to 40 points
+            yPosition += 40; 
     
-            // Period Length Trends - Table
+            // table for period length trends
             pdf.setFontSize(16);
             pdf.setFont("helvetica", "bold");
             const periodLengthData = [];
@@ -539,7 +532,7 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
             }
             ensureHeadingAndTableFit("Period Length Trends", periodLengthData, [150, 150, 100], (pageWidth - 400) / 2);
             pdf.text("Period Length Trends", margin, yPosition);
-            yPosition += 30; // Increased space below section heading
+            yPosition += 30; 
             addNewPageIfNeeded();
     
             pdf.setFontSize(10);
@@ -552,42 +545,42 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
                     `${entry.period_length} days`,
                 ]);
     
-                // Table Header
+                // table header
                 const headers = ["Start Date", "End Date", "No. of Days"].map(header => header.toUpperCase());
                 const columnWidths = [150, 150, 100];
                 const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
                 const tableX = (pageWidth - tableWidth) / 2;
     
-                pdf.setFillColor(249, 242, 252); // Very very light purple #f9f2fc
-                pdf.setTextColor(0, 0, 0); // Black text for header
+                pdf.setFillColor(249, 242, 252);
+                pdf.setTextColor(0, 0, 0); 
                 headers.forEach((header, index) => {
-                    pdf.setFillColor(249, 242, 252); // Explicitly set light purple for each header cell
+                    pdf.setFillColor(249, 242, 252); 
                     pdf.rect(tableX + columnWidths.slice(0, index).reduce((a, b) => a + b, 0), yPosition, columnWidths[index], 20, "F");
                     pdf.rect(tableX + columnWidths.slice(0, index).reduce((a, b) => a + b, 0), yPosition, columnWidths[index], 20);
                     pdf.text(header, tableX + columnWidths.slice(0, index).reduce((a, b) => a + b, 0) + 5, yPosition + 15);
                 });
                 yPosition += 20;
     
-                // Table Rows
-                pdf.setFillColor(255, 255, 255); // White
-                pdf.setTextColor(0, 0, 0); // Black
+                // table rows
+                pdf.setFillColor(255, 255, 255); 
+                pdf.setTextColor(0, 0, 0); 
                 tableData.forEach((row) => {
                     row.forEach((cell, colIndex) => {
-                        pdf.setFillColor(255, 255, 255); // Explicitly set white for each row cell
+                        pdf.setFillColor(255, 255, 255); 
                         pdf.rect(tableX + columnWidths.slice(0, colIndex).reduce((a, b) => a + b, 0), yPosition, columnWidths[colIndex], 20, "F");
                         pdf.rect(tableX + columnWidths.slice(0, colIndex).reduce((a, b) => a + b, 0), yPosition, columnWidths[colIndex], 20);
                         pdf.text(cell, tableX + columnWidths.slice(0, colIndex).reduce((a, b) => a + b, 0) + 5, yPosition + 15);
                     });
-                    yPosition += 25; // Increased row spacing
+                    yPosition += 25; 
                     addNewPageIfNeeded();
                 });
             } else {
                 pdf.text("No period data available.", margin, yPosition);
                 yPosition += 20;
             }
-            yPosition += 40; // Increased space after table
+            yPosition += 40; 
     
-            // Symptoms Logged by Cycle Day - Table
+            // table for symptoms logged by cycle day
             pdf.setFontSize(16);
             pdf.setFont("helvetica", "bold");
             const symptomsData = [];
@@ -599,7 +592,7 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
             }
             ensureHeadingAndTableFit("Symptoms Logged by Cycle Day", symptomsData, [100, 300], (pageWidth - 400) / 2);
             pdf.text("Symptoms Logged by Cycle Day", margin, yPosition);
-            yPosition += 30; // Increased space below section heading
+            yPosition += 30; 
             addNewPageIfNeeded();
     
             pdf.setFontSize(10);
@@ -610,43 +603,43 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
                     symptoms.join(", "),
                 ]);
     
-                // Table Header
+                // header tble
                 const headers = ["Cycle Day", "Symptoms"].map(header => header.toUpperCase());
                 const columnWidths = [100, 300];
                 const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
                 const tableX = (pageWidth - tableWidth) / 2;
     
-                pdf.setFillColor(249, 242, 252); // Very very light purple #f9f2fc
-                pdf.setTextColor(0, 0, 0); // Black text for header
+                pdf.setFillColor(249, 242, 252); 
+                pdf.setTextColor(0, 0, 0); 
                 headers.forEach((header, index) => {
-                    pdf.setFillColor(249, 242, 252); // Explicitly set light purple for each header cell
+                    pdf.setFillColor(249, 242, 252); 
                     pdf.rect(tableX + columnWidths.slice(0, index).reduce((a, b) => a + b, 0), yPosition, columnWidths[index], 20, "F");
                     pdf.rect(tableX + columnWidths.slice(0, index).reduce((a, b) => a + b, 0), yPosition, columnWidths[index], 20);
                     pdf.text(header, tableX + columnWidths.slice(0, index).reduce((a, b) => a + b, 0) + 5, yPosition + 15);
                 });
                 yPosition += 20;
     
-                // Table Rows
-                pdf.setFillColor(255, 255, 255); // White
-                pdf.setTextColor(0, 0, 0); // Black
+                // table rows
+                pdf.setFillColor(255, 255, 255);
+                pdf.setTextColor(0, 0, 0); 
                 tableData.forEach((row) => {
                     row.forEach((cell, colIndex) => {
-                        pdf.setFillColor(255, 255, 255); // Explicitly set white for each row cell
+                        pdf.setFillColor(255, 255, 255);
                         pdf.rect(tableX + columnWidths.slice(0, colIndex).reduce((a, b) => a + b, 0), yPosition, columnWidths[colIndex], 20, "F");
                         pdf.rect(tableX + columnWidths.slice(0, colIndex).reduce((a, b) => a + b, 0), yPosition, columnWidths[colIndex], 20);
                         const cellLines = pdf.splitTextToSize(cell, columnWidths[colIndex] - 10);
                         pdf.text(cellLines, tableX + columnWidths.slice(0, colIndex).reduce((a, b) => a + b, 0) + 5, yPosition + 15);
                     });
-                    yPosition += 25; // Increased row spacing
+                    yPosition += 25; 
                     addNewPageIfNeeded();
                 });
             } else {
                 pdf.text("No symptoms logged.", margin, yPosition);
                 yPosition += 20;
             }
-            yPosition += 80; // Increased space after table to add more space before next section
+            yPosition += 80; 
     
-            // Cycle Days Where Symptoms Are Likely to Appear - Table
+            // table for when symptoms are likely to appear
             pdf.setFontSize(16);
             pdf.setFont("helvetica", "bold");
             const symptomRangesData = [];
@@ -660,7 +653,7 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
             }
             ensureHeadingAndTableFit("Cycle Days Where Symptoms Are Likely to Appear", symptomRangesData, [150, 250], (pageWidth - 400) / 2);
             pdf.text("Cycle Days Where Symptoms Are Likely to Appear", margin, yPosition);
-            yPosition += 30; // Increased space below section heading
+            yPosition += 30; 
             addNewPageIfNeeded();
     
             pdf.setFontSize(10);
@@ -673,42 +666,42 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
                     return [symptom, rangeText];
                 });
     
-                // Table Header
+                // header table
                 const headers = ["Symptom", "Likely Cycle Days"].map(header => header.toUpperCase());
                 const columnWidths = [150, 250];
                 const tableWidth = columnWidths.reduce((a, b) => a + b, 0);
                 const tableX = (pageWidth - tableWidth) / 2;
     
-                pdf.setFillColor(249, 242, 252); // Very very light purple #f9f2fc
-                pdf.setTextColor(0, 0, 0); // Black text for header
+                pdf.setFillColor(249, 242, 252); 
+                pdf.setTextColor(0, 0, 0); 
                 headers.forEach((header, index) => {
-                    pdf.setFillColor(249, 242, 252); // Explicitly set light purple for each header cell
+                    pdf.setFillColor(249, 242, 252); 
                     pdf.rect(tableX + columnWidths.slice(0, index).reduce((a, b) => a + b, 0), yPosition, columnWidths[index], 20, "F");
                     pdf.rect(tableX + columnWidths.slice(0, index).reduce((a, b) => a + b, 0), yPosition, columnWidths[index], 20);
                     pdf.text(header, tableX + columnWidths.slice(0, index).reduce((a, b) => a + b, 0) + 5, yPosition + 15);
                 });
                 yPosition += 20;
     
-                // Table Rows
-                pdf.setFillColor(255, 255, 255); // White
-                pdf.setTextColor(0, 0, 0); // Black
+                // table rows
+                pdf.setFillColor(255, 255, 255); 
+                pdf.setTextColor(0, 0, 0); 
                 tableData.forEach((row) => {
                     row.forEach((cell, colIndex) => {
-                        pdf.setFillColor(255, 255, 255); // Explicitly set white for each row cell
+                        pdf.setFillColor(255, 255, 255); 
                         pdf.rect(tableX + columnWidths.slice(0, colIndex).reduce((a, b) => a + b, 0), yPosition, columnWidths[colIndex], 20, "F");
                         pdf.rect(tableX + columnWidths.slice(0, colIndex).reduce((a, b) => a + b, 0), yPosition, columnWidths[colIndex], 20);
                         pdf.text(cell, tableX + columnWidths.slice(0, colIndex).reduce((a, b) => a + b, 0) + 5, yPosition + 15);
                     });
-                    yPosition += 25; // Increased row spacing
+                    yPosition += 25; 
                     addNewPageIfNeeded();
                 });
             } else {
                 pdf.text("No symptom range data available.", margin, yPosition);
                 yPosition += 20;
             }
-            yPosition += 40; // Increased space after table
+            yPosition += 40; 
     
-            // Add logo to every page
+            // Add logo 
             const logoImg = new Image();
             logoImg.src = "/images/logo.png";
             await new Promise((resolve) => {
@@ -721,11 +714,11 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
     
             const totalPages = pdf.getNumberOfPages();
             for (let i = 1; i <= totalPages; i++) {
-                pdf.setPage(i); // Switch to the page
+                pdf.setPage(i); // switching pages
                 pdf.addImage(logoImg, "PNG", pageWidth - margin - 50, pageHeight - margin - 50, 50, 50);
             }
     
-            // Save the PDF
+            //save pdf
             pdf.save("symptom_report.pdf");
         } catch (error) {
             console.error("Error generating PDF:", error);
@@ -735,6 +728,7 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
         }
     };
     
+    //csv
     const handleDownloadCSV = async () => {
         setLoading(true);
         try {
@@ -745,14 +739,13 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
                 },
             };
     
-            // Fetch user data
             const userResponse = await axiosInstance.get("/users/users/auth-status/", config);
             const userName = userResponse.data.username || "User";
     
-            // Fetch report data
+            // report data 
             const response = await axiosInstance.get("/users/symptom-report/", config);
     
-            // Prepare data arrays (same as in handleDownloadPDF)
+            // prepare arrays 
             const cycleLengthData = [];
             if (menstrualData.length > 1) {
                 const lastCycles = menstrualData.slice(-6);
@@ -803,7 +796,7 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
                 }));
             }
     
-            // Prepare summary data
+            // prepare summary 
             const today = new Date();
             const formattedDateTime = format(today, "MMMM d, yyyy, h:mm a");
             const summaryData = [{
@@ -813,7 +806,7 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
                 "Date Generated": formattedDateTime,
             }];
     
-            // Combine all data into a single CSV with section headers
+            // combine all data with section headers
             let csvContent = "=== Summary ===\n";
             csvContent += Papa.unparse(summaryData) + "\n\n";
     
@@ -829,7 +822,7 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
             csvContent += "=== Cycle Days Where Symptoms Are Likely to Appear ===\n";
             csvContent += Papa.unparse(symptomRangesData);
     
-            // Create and download the CSV file
+            // create and download the CSV file
             const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
@@ -846,7 +839,7 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
         }
     };
     
-
+    //past stats
     const calculatePastCycleStats = () => {
         if (menstrualData.length < 2) {
           return {
@@ -857,7 +850,7 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
           };
         }
       
-        const lastCycles = menstrualData.slice(-6); // Last 6 cycles
+        const lastCycles = menstrualData.slice(-6); // for the last 6 cycles
         const prevCycle = lastCycles[lastCycles.length - 1];
         const prevCycleLength = prevCycle.cycle_length || differenceInDays(
           parseISO(prevCycle.start_date),
@@ -865,7 +858,6 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
         );
         const prevPeriodLength = prevCycle.period_length;
       
-        // Calculate variation (standard deviation of cycle lengths)
         const cycleLengths = lastCycles.slice(1).map((cycle, index) => {
           const prevCycle = lastCycles[index];
           return differenceInDays(parseISO(cycle.start_date), parseISO(prevCycle.start_date));
@@ -875,8 +867,8 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
         const variance = cycleLengths.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / cycleLengths.length;
         const variation = Math.sqrt(variance).toFixed(1);
       
-        // Normal range for cycle length is typically 21-35 days
-        // Normal variation is typically less than 7-9 days
+        // normal range for cycle length is 21-35 days
+        // normal variation is less than 7-9 days
         const isNormal = prevCycleLength >= 21 && prevCycleLength <= 35 && variation < 9;
       
         return {
@@ -889,14 +881,14 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
 
       return (
         <div className="menstrual-tracker-container">
-          {/* Header separated for transparency */}
+        
           <header className="tracker-header">
             <h1>{username ? `${username}'s Cycle Tracker` : "Cycle Tracker"}</h1>
           </header>
-          {/* Main content below the background image */}
+          {/* main content  */}
           <div className="tracker-main-content">
       <div className="tracker-content" style={{ display: 'flex', justifyContent: 'center' }}>
-        {/* Left Section - Cycle Summary */}
+        {/* left section - sycle summary */}
         <div className="left-section" style={{ flex: '1' }}>
           <div className="cycle-summary">
           <h2>Cycle Summary <span role="img" aria-label="droplet">💧</span></h2>
@@ -939,7 +931,7 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
           </div>
         </div>
 
-        {/* Middle Section - Calendar */}
+        {/* middle section - calendar */}
         <div className="middle-section" style={{ flex: '1' }}>
           <div className="calendar-section">
             <h2>{format(calendarDate, "MMMM yyyy")}</h2>
@@ -972,7 +964,7 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
           </div>
         </div>
 
-{/* Right Section - Previous Cycle Stats */}
+{/* right section - previous cycle stats */}
 <div className="right-section" style={{ flex: '1'}}>
           <div className="cycle-stats">
             <h2>Previous Cycle Stats</h2>
@@ -1002,6 +994,7 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
           </div>
         </div>
       </div>
+      {/* insights */}
             <div className="insights-section">
                 <h2>Cycle Insights</h2>
                 <div className="insights-cards">
@@ -1015,16 +1008,18 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
                     </div>
                 </div>
             </div>
+            {/* charts */}
             <div className="charts-section">
   <div className="chart">
     <h3>Cycle Length Trends</h3>
     {chartData.cycle && <Line data={chartData.cycle} options={cycleOptions} />}
   </div>
-  <div className="chart period-length-chart"> {/* Added specific class */}
+  <div className="chart period-length-chart"> 
     <h3>Period Length Trends</h3>
     {chartData.period && <Bar data={chartData.period} options={periodOptions} />}
   </div>
 </div>
+{/* exports */}
             <div className="export-section">
   <h2>Export & Reports</h2>
   <p>

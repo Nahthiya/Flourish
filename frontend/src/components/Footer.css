@@ -1,24 +1,20 @@
-/* Import Modern Sans-Serif Font (Same as Header) */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
-/* Footer Styles */
 .footer {
-  background: #e9e7e76d; /* Soft neutral background */
+  background: #e9e7e76d; 
   padding: 60px 5%;
   color: #412F26;
   
 }
 
-/* Footer Container */
 .footer-container {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap;
-  gap: 20px; /* Reduced gap to bring sections closer */
+  gap: 20px; 
 }
 
-/* Left Side - Description */
 .footer-description {
   flex: 1;
   max-width: 350px;
@@ -37,15 +33,13 @@
   color: #5D2510;
 }
 
-/* Right Side - Links (Moved Closer) */
 .footer-links {
   display: flex;
-  gap: 90px; /* Reduced space to bring sections closer */
+  gap: 90px; 
   flex: 1;
   margin-left: 400px;
 }
 
-/* Sections - Quick Links & Follow Us */
 .footer-section h3 {
   font-size: 1.3rem;
   font-weight: 600;
@@ -65,20 +59,19 @@
   color: #806044;
 }
 
-/* Copyright */
 .copyright {
   margin-top: 20px;
   font-size: 0.9rem;
   color: #806044;
 }
-/* Social Media Icons */
+
 .social-icon {
   font-size: 10px  !important;
-  margin-right: 8px; /* Spacing between icon and text */
+  margin-right: 8px; 
   color: #412F26;
   transition: color 0.3s ease-in-out;
 }
 
 .social-icon:hover {
-  color: #806044; /* Color change on hover */
+  color: #806044; 
 }

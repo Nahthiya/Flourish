@@ -146,21 +146,21 @@
   gap: 1px; 
 }
 .chat-header-text {
-  flex: 1; /* Allow the text to take up remaining space */
+  flex: 1; 
 }
 .chat-header-text h2 {
   font-family: 'Open-Sans',  'system-ui';
-  font-size: 18px; /* Adjust the font size */
-  font-weight: 600; /* Make the text bold */
-  color: #1f2937; /* Set the text color */
-  margin: 0; /* Remove default margin */;
+  font-size: 18px; 
+  font-weight: 600; 
+  color: #1f2937; 
+  margin: 0; 
   margin-left: -400px;
 }
 
 .chat-header-text p {
-  font-size: 14px; /* Adjust the font size */
-  color: #6b7280; /* Set the text color */
-  margin: 4px 0 0; /* Add spacing between the heading and paragraph */
+  font-size: 14px;
+  color: #6b7280; 
+  margin: 4px 0 0; 
   margin-left: -400px;
 }
 
@@ -177,7 +177,7 @@ margin-left: 300px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 280px); /* Adjust based on your header and input height */
+  max-height: calc(100vh - 280px);
 }
 .message-container {
   display: flex;
@@ -373,18 +373,17 @@ margin-left: 300px;
   z-index: 5;
 }
 
-/* Custom styles for the delete confirmation toast */
+
 .Toastify__toast--info#delete-toast {
-  background-color: #f8f9fa; /* Light background */
-  color: #1f2937; /* Dark text */
-  border: 1px solid #e5e7eb; /* Add a border */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a shadow */
-  font-family: 'Open Sans', sans-serif; /* Use a different font */
-  font-size: 14px; /* Adjust font size */
-  border-radius: 12px; /* Rounded corners */
+  background-color: #f8f9fa; 
+  color: #1f2937; 
+  border: 1px solid #e5e7eb; 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+  font-family: 'Open Sans', sans-serif; 
+  font-size: 14px; 
+  border-radius: 12px; 
 }
 
-/* Style the buttons inside the toast */
 .Toastify__toast--info#delete-toast button {
   font-family: 'Open Sans', sans-serif;
   font-size: 14px;
@@ -395,19 +394,16 @@ margin-left: 300px;
   transition: background 0.3s ease;
 }
 
-/* Style the "Yes" button */
 .Toastify__toast--info#delete-toast button:first-of-type {
   background-color: #f1cfe1;
   color: black;
 }
 
-/* Style the "No" button */
 .Toastify__toast--info#delete-toast button:last-of-type {
   background-color: #f1cfe1;
   color: black;
 }
 
-/* Hover effects for buttons */
 .Toastify__toast--info#delete-toast button:hover {
   opacity: 0.9;
 }

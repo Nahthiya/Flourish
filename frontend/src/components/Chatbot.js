@@ -5,8 +5,8 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const userAvatar = "/images/user-avatar.png";  // Path to user avatar
-const botAvatar = "/images/flower.png";  // Path to bot avatar
+const userAvatar = "/images/user-avatar.png";  
+const botAvatar = "/images/flower.png"; 
 
 const Chatbot = ({ isFullPage }) => {
   const [messages, setMessages] = useState([]);
@@ -26,6 +26,7 @@ const Chatbot = ({ isFullPage }) => {
     getCsrfToken();
   }, []);
 
+  //change botname
   const handleBotNameChange = async () => {
     if (!newBotName.trim()) {
       toast.error("Bot name cannot be empty.");
@@ -38,8 +39,8 @@ const Chatbot = ({ isFullPage }) => {
       });
   
       if (response.status === 200) {
-        setBotName(newBotName); // Update the bot name in the UI
-        setIsEditingBotName(false); // Exit edit mode
+        setBotName(newBotName); 
+        setIsEditingBotName(false); 
         toast.success("Bot name updated successfully!");
       } else {
         toast.error("Failed to update bot name.");
@@ -50,6 +51,7 @@ const Chatbot = ({ isFullPage }) => {
     }
   };
 
+  //get chat history
   const fetchChatHistory = useCallback(async () => {
     try {
       const response = await axiosInstance.get("/users/get-chat-history/");
@@ -68,6 +70,7 @@ const Chatbot = ({ isFullPage }) => {
     fetchChatHistory();
   }, [fetchChatHistory]);
 
+  //new chat
   const startNewChat = useCallback(async () => {
     try {
       const accessToken = localStorage.getItem("accessToken");
@@ -96,6 +99,7 @@ const Chatbot = ({ isFullPage }) => {
     }
   }, [fetchChatHistory]);
 
+  //load session
   const loadChatSession = useCallback(async (session_id) => {
     setCurrentSession(session_id);
     localStorage.setItem("currentSession", session_id);
@@ -118,6 +122,7 @@ const Chatbot = ({ isFullPage }) => {
     }
   }, [loadChatSession]);
 
+  //delete chat
   const deleteChatSession = async (session_id) => {
     toast.info(
       <div>
@@ -150,13 +155,14 @@ const Chatbot = ({ isFullPage }) => {
         </button>
       </div>,
       {
-        toastId: "delete-toast", // Add a custom toast ID
+        toastId: "delete-toast",
         autoClose: false,
         closeButton: false,
       }
     );
   };
 
+  //send msg
   const sendMessage = async (messageText = null) => {
     const textToSend = messageText || input;
     if (!textToSend.trim() || loading) return;
@@ -182,6 +188,7 @@ const Chatbot = ({ isFullPage }) => {
     setIsTyping(false);
   };
 
+  //drag chats
   const onDragEnd = (result) => {
     if (!result.destination) return;
     const reorderedChats = [...chatHistory];
@@ -190,6 +197,7 @@ const Chatbot = ({ isFullPage }) => {
     setChatHistory([...reorderedChats]);
   };
 
+  //suggested topics
   const handleSuggestedTopicClick = (topic) => {
     setInput(topic);
   };
@@ -300,11 +308,11 @@ const Chatbot = ({ isFullPage }) => {
           border: "none",
           cursor: "pointer",
           fontSize: "18px",
-          color: "#6b7280", // Default color
-          transition: "color 0.3s ease", // Smooth transition
+          color: "#6b7280", 
+          transition: "color 0.3s ease", 
         }}
-        onMouseEnter={(e) => (e.target.style.color = "#ef4444")} // Red on hover
-        onMouseLeave={(e) => (e.target.style.color = "#6b7280")} // Reset on mouse leave
+        onMouseEnter={(e) => (e.target.style.color = "#ef4444")} 
+        onMouseLeave={(e) => (e.target.style.color = "#6b7280")} 
         aria-label="Close edit mode"
       >
         <span role="img" aria-label="Close edit mode">❌</span>
