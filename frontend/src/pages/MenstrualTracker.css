@@ -1,133 +1,274 @@
-/* General page container to include Header and Footer */
-.page-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
+/* Ensure specificity to avoid affecting other UIs */
 .menstrual-tracker-container {
   flex: 1;
   padding: 20px;
-  background-color: #f9f9f9;
+  background:linear-gradient(to bottom, #eeedee, #ffffff);
+  min-height: 100vh; /* Ensure it spans the viewport */
+  position: relative; /* For positioning children */
 }
 
-h1 {
-  color: #5e4b8b;
-  font-size: 24px;
+/* Transparent header */
+.menstrual-tracker-container .tracker-header {
+  background: transparent; /* Transparent background */
+  padding: 20px;
+  position: absolute; /* Overlay on background image */
+  top: 60;
+  left: 0;
+  right: 0;
   text-align: center;
-  margin-bottom: 20px;
 }
 
-/* Tracker content (Cycle Summary and Calendar) */
-.tracker-content {
+.menstrual-tracker-container .tracker-header h1 {
+  color: #083b54; /* Keep header color consistent */
+  font-size: 28px;
+  margin-top: 70px;
+  font-family: "Poppins";
+}
+
+/* Main content below the header */
+.menstrual-tracker-container .tracker-main-content {
+  padding-top: 175px; /* Push content below header */
+  border-radius: 10px;
+  overflow-x: hidden;
+}
+
+.menstrual-tracker-container .tracker-content {
   display: flex;
-  gap: 20px;
+  justify-content: center;
+  gap: 50px !important; /* Increased from 20px to 40px for more space; adjust as needed */
   margin-bottom: 20px;
+  max-width: 2000px; /* Increased slightly to accommodate wider spacing */
+  margin-left: auto;
+  margin-right: auto; /* Centered horizontally */
 }
 
-.left-section, .right-section {
+.menstrual-tracker-container .left-section {
   flex: 1;
+  max-width: 500px;
+}
+
+.menstrual-tracker-container .middle-section {
+  flex: 1;
+  max-width: 400px;
+}
+
+.menstrual-tracker-container .right-section {
+  flex: 1;
+  max-width: 500px;
 }
 
 /* Cycle Summary Section */
-.cycle-summary {
+.menstrual-tracker-container .cycle-summary {
   background: #fff;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 100%; /* Ensure it takes full available width */
+  margin-right: 40px;
 }
 
-.cycle-summary h2 {
+.menstrual-tracker-container .cycle-summary h2 {
   color: #5e4b8b;
-  font-size: 18px;
+  font-size: 21px;
   margin-bottom: 15px;
+  font-family: "Poppins";
 }
 
-.summary-details p {
-  margin: 10px 0;
-  font-size: 14px;
+.menstrual-tracker-container .cycle-phase h3 {
+  color: #000; /* Black text for "You are currently in your..." */
+  font-size: 17px;
+  margin-bottom: 20px;
+  margin-top: 35px;
 }
 
-.summary-details strong {
-  color: #333;
+.menstrual-tracker-container .cycle-phase h3 .phase-name {
+  font-weight: bold; /* Make the phase name stand out */
 }
 
-.recent-symptoms {
-  margin-top: 15px;
+.menstrual-tracker-container .cycle-phase progress {
+  width: 90%;
+  height: 30px;
+  --progress-color: #ccc; /* Fallback color */
+  margin-bottom: 40px;
+  border: none; /* Remove default border */
+  background-color: #e0e0e0; /* Background of the entire bar (unfilled portion) */
+  border-radius: 20px; /* Rounded edges for a smoother look */
 }
 
-.recent-symptoms h3 {
-  color: #5e4b8b;
-  font-size: 16px;
-  margin-bottom: 10px;
+/* Webkit (Chrome, Safari, Edge) */
+.menstrual-tracker-container .cycle-phase progress::-webkit-progress-bar {
+  background-color: #e0e0e0; /* Background of the bar */
+  border-radius: 20px;
 }
 
-.symptoms-list {
+.menstrual-tracker-container .cycle-phase progress::-webkit-progress-value {
+  background-color: var(--progress-color); /* Use the custom property */
+  border-radius: 20px; /* Match the bar’s rounding */
+}
+
+/* Firefox */
+.menstrual-tracker-container .cycle-phase progress::-moz-progress-bar {
+  background-color: var(--progress-color);
+  border-radius: 20px;
+}
+
+/* For browsers that don’t support pseudo-elements (fallback) */
+.menstrual-tracker-container .cycle-phase progress {
+  color: var(--progress-color); /* Fallback for older browsers */
+}
+
+.menstrual-tracker-container .summary-details {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-direction: column;
+  gap: 20px; /* Space between bubbles */
+}
+.menstrual-tracker-container .summary-details .bubble {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f4e1f7; /* Light purple background */
+  padding: 10px 15px;
+  border-radius: 20px; /* Oval shape */
+  font-size: 16px;
+  color: #534141;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.symptom-tag {
-  background: #f4e1f7;
-  color: #5e4b8b;
+.menstrual-tracker-container .summary-details .bubble strong {
+  color: #5e4b8b; /* Darker purple for the label */
+  font-weight: 600;
+}
+
+.menstrual-tracker-container .summary-details .bubble span {
+  background: #fff; /* White background for the value */
   padding: 5px 10px;
   border-radius: 15px;
-  font-size: 12px;
+  margin-left: 10px;
+  font-weight: bold;
+}
+
+.menstrual-tracker-container .recent-symptoms {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.menstrual-tracker-container .recent-symptoms h3 {
+  color: #5e4b8b;
+  font-size: 19px;
+  margin-bottom: 20px;
+}
+
+.menstrual-tracker-container .symptoms-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+}
+
+.menstrual-tracker-container .symptom-tag {
+  background: #f4e1f7;
+  color: #5e4b8b;
+  padding: 8px 15px;
+  border-radius: 15px;
+  font-size: 16px;
 }
 
 /* Calendar Section */
-.calendar-section {
+.menstrual-tracker-container .calendar-section {
   background: #fff;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.calendar-section h2 {
+.menstrual-tracker-container .calendar-section h2 {
   color: #5e4b8b;
-  font-size: 18px;
+  font-size: 21px;
   margin-bottom: 15px;
+  font-family: "Poppins";
 }
 
-.react-calendar {
+.menstrual-tracker-container .react-calendar {
   border: none !important;
   font-family: Arial, sans-serif;
+  width: 100%;
+  max-width: 350px;
 }
 
-.past-period-day {
-  background-color: #ff9999 !important;
+/* Adjust the calendar tiles to be square and taller */
+.menstrual-tracker-container .react-calendar__tile {
+  width: 48px !important;
+  height: 48px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative; /* Context for absolute positioning */
+  overflow: hidden !important;
+}
+
+/* Past period days */
+.menstrual-tracker-container .past-period-day {
+  background-color: #ff6384 !important;
   color: white !important;
   border-radius: 50% !important;
-}
-
-.predicted-period-day {
-  background-color: #ffcc99 !important;
-  color: black !important;
-  border-radius: 50% !important;
-}
-
-.symptom-logged-day {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
 }
 
-.symptom-logged-day::after {
-  content: "•";
-  color: #ff9800;
-  font-size: 1.5rem;
-  position: absolute;
-  bottom: 2px;
-  left: 50%;
-  transform: translateX(-50%);
+/* Predicted period days */
+.menstrual-tracker-container .predicted-period-day {
+  background-color: #ffe6e6 !important;
+  color: black !important;
+  border-radius: 50% !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.calendar-buttons {
+/* Symptom-logged days */
+.menstrual-tracker-container .symptom-logged-day::after {
+  content: "•";
+  color: #d3d3d3; /* Light grey dot */
+  font-size: 2rem; /* Smaller dot to fit within circle */
+  position: absolute;
+  top: 2px; /* Position at top of tile */
+  right: 2px; /* Position at right of tile */
+  transform: none; /* Remove centering transform */
+}
+
+.menstrual-tracker-container .symptom-logged-day {
+  position: relative;
+}
+
+.menstrual-tracker-container .calendar-buttons {
   display: flex;
   gap: 10px;
   margin-top: 15px;
+  justify-content: center;
 }
 
-.log-period-btn, .log-symptoms-btn {
+.menstrual-tracker-container .log-period-btn {
+  background-color: #ff6384;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.menstrual-tracker-container .log-symptoms-btn {
+  background-color: #5e4b8b;
+  color: white;
   padding: 10px 20px;
   border: none;
   border-radius: 20px;
@@ -135,109 +276,8 @@ h1 {
   cursor: pointer;
 }
 
-.log-period-btn {
-  background: #ff6384;
-  color: white;
-}
-
-.log-symptoms-btn {
-  background: #5e4b8b;
-  color: white;
-}
-
-/* Cycle Insights Section */
-.insights-section {
-  margin-bottom: 20px;
-}
-
-.insights-section h2 {
-  color: #5e4b8b;
-  font-size: 18px;
-  margin-bottom: 15px;
-}
-
-.insights-cards {
-  display: flex;
-  gap: 15px;
-}
-
-.insight-card {
-  flex: 1;
-  background: #fff;
-  padding: 15px;
-  border-radius: 10px;
-  text-align: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.insight-card h3 {
-  color: #333;
-  font-size: 16px;
-  margin-bottom: 10px;
-}
-
-.insight-card p {
-  color: #ff6384;
-  font-size: 20px;
-  font-weight: bold;
-}
-
-/* Charts Section */
-.charts-section {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.chart {
-  flex: 1;
-  background: #fff;
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.chart h3 {
-  color: #5e4b8b;
-  font-size: 16px;
-  margin-bottom: 10px;
-}
-
-/* Export Section */
-.export-section {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.export-section h2 {
-  color: #5e4b8b;
-  font-size: 18px;
-  margin-bottom: 15px;
-}
-
-.export-buttons {
-  display: flex;
-  gap: 10px;
-}
-
-.export-btn {
-  padding: 10px 20px;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  background: #fff;
-  color: #5e4b8b;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.export-btn:hover {
-  background: #f4e1f7;
-}
-
-/* Modal Styles */
-.modal-overlay {
+/* Symptom Overlay */
+.menstrual-tracker-container .symptom-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -250,7 +290,260 @@ h1 {
   z-index: 1000;
 }
 
-.modal-content {
+.menstrual-tracker-container .symptom-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  width: 300px;
+  text-align: center;
+}
+
+.menstrual-tracker-container .symptom-content h3 {
+  color: #5e4b8b;
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+.menstrual-tracker-container .symptom-content ul {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 15px;
+}
+
+.menstrual-tracker-container .symptom-content li {
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+.menstrual-tracker-container .symptom-content button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.menstrual-tracker-container .symptom-content .log-symptoms-btn {
+  background: #5e4b8b;
+  color: white;
+}
+
+.menstrual-tracker-container .symptom-content button:last-child {
+  background: #ddd;
+  color: #333;
+}
+
+.menstrual-tracker-container .cycle-stats {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.menstrual-tracker-container .cycle-stats h2 {
+  color: #5e4b8b;
+  font-size: 21px;
+  margin-bottom: 10px;
+  text-align: center;
+  font-family: "Poppins";
+}
+
+.menstrual-tracker-container .cycle-stats .stats-message {
+  color: #333;
+  font-size: 17px;
+  margin-bottom: 30px;
+  text-align: center;
+  /* Remove flex and gap since it's just a single string now */
+}
+
+.menstrual-tracker-container .cycle-stats .stats-message .message-text {
+  margin-right: 0; /* No space before emoji */
+}
+
+.menstrual-tracker-container .cycle-stats .stats-details {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 40px; /* Space between each stat block */
+}
+
+.menstrual-tracker-container .cycle-stats .stats-details .stat-item {
+  display: block; /* Changed from flex to block for line separation */
+}
+
+.menstrual-tracker-container .cycle-stats .stats-details .stat-item .stat-name {
+  display: block; /* Ensure it takes full width and forces a new line */
+  font-size: 18px;
+  color: #534141;
+  text-align: left;
+  font-weight: 600;
+  margin-bottom: 3px; /* Small space between name and value */
+}
+
+.menstrual-tracker-container .cycle-stats .stats-details .stat-item .stat-value {
+  display: block; /* Ensure it takes full width and stays on a new line */
+  font-size: 16px;
+  color: #5e4b8b;
+  text-align: right;
+  font-weight: bold;
+}
+.menstrual-tracker-container .cycle-stats .stats-image {
+  width: 100%; /* Full width of the container (up to 300px) */
+  max-width: 140px; /* Limit max width for smaller images */
+  height: auto; /* Maintain aspect ratio */
+  margin-top: 0px; /* Space above the image */
+  display: block; /* Ensure it behaves as a block element */
+}
+
+/* Modify the right-section to accommodate two boxes side by side */
+.menstrual-tracker-container .right-section {
+  display: flex;
+  gap: 20px; /* Space between stats and calendar */
+  width: 100%;
+  justify-content: center;
+}
+
+.menstrual-tracker-container .insights-section {
+  margin-bottom: 20px;
+}
+
+.menstrual-tracker-container .insights-section h2 {
+  color: #5e4b8b;
+  font-size: 21px;
+  margin-bottom: 15px;
+  font-family: "Poppins";
+}
+
+.menstrual-tracker-container .insights-cards {
+  display: flex;
+  gap: 15px;
+}
+
+.menstrual-tracker-container .insight-card {
+  flex: 1;
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.menstrual-tracker-container .insight-card h3 {
+  color: #333;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.menstrual-tracker-container .insight-card p {
+  color: #ff6384;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.menstrual-tracker-container .charts-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 20px;
+  justify-content: center;
+  max-width: 100%;
+}
+
+.menstrual-tracker-container .chart {
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 100%; /* Full width of parent up to max */
+  max-width: 600px; /* Limit chart width */
+  height: 375px; /* Fixed height to constrain chart */
+  overflow: hidden; /* Prevent content from spilling out */
+  position: relative;
+}
+.menstrual-tracker-container .period-length-chart {
+  height: 375px; /* Increased from 370px to give more room for x-axis labels */
+}
+
+/* Add this new style to ensure the chart container has enough bottom padding */
+.menstrual-tracker-container .charts-section canvas {
+  padding-bottom: 10px;
+}
+
+.menstrual-tracker-container .chart h3 {
+  color: #5e4b8b;
+  font-size: 16px;
+  margin-bottom: 10px;
+  font-family: "Poppins";
+}
+
+.menstrual-tracker-container .export-section {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: center; /* Center all text content */
+}
+
+.menstrual-tracker-container .export-section h2 {
+  color: #5e4b8b;
+  font-size: 21px;
+  margin-bottom: 15px;
+  font-family: "Poppins";
+}
+
+.menstrual-tracker-container .export-section p {
+  color: #333;
+  font-size: 18px;
+  margin-bottom: 20px; /* Space between description and buttons */
+  line-height: 1.5; /* Improve readability */
+}
+
+.menstrual-tracker-container .export-section .export-buttons {
+  display: flex;
+  justify-content: center; /* Center buttons horizontally */
+  gap: 15px; /* Increased from 10px for better spacing */
+}
+
+.menstrual-tracker-container .export-section .export-btn {
+  padding: 10px 20px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: #fff;
+  color: #5e4b8b;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease; /* Smooth hover transition */
+}
+
+.menstrual-tracker-container .export-section .export-btn:hover {
+  background: #f4e1f7;
+}
+
+.menstrual-tracker-container .export-section .export-btn:disabled {
+  opacity: 0.6; /* Dim when disabled */
+  cursor: not-allowed;
+}
+
+/* Modal Styles remain unchanged but scoped */
+.menstrual-tracker-container .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.menstrual-tracker-container .modal-content {
   background: #fff;
   padding: 20px;
   border-radius: 10px;
@@ -259,13 +552,13 @@ h1 {
   text-align: center;
 }
 
-.modal-content h2 {
+.menstrual-tracker-container .modal-content h2 {
   color: #5e4b8b;
   font-size: 18px;
   margin-bottom: 15px;
 }
 
-.inputBox {
+.menstrual-tracker-container .inputBox {
   width: 100%;
   padding: 10px;
   margin-bottom: 10px;
@@ -274,18 +567,18 @@ h1 {
   font-size: 14px;
 }
 
-.calendarElement {
+.menstrual-tracker-container .calendarElement {
   margin: 0 auto;
 }
 
-.modal-buttons {
+.menstrual-tracker-container .modal-buttons {
   display: flex;
   gap: 10px;
   justify-content: center;
   margin-top: 15px;
 }
 
-.modal-buttons button {
+.menstrual-tracker-container .modal-buttons button {
   padding: 10px 20px;
   border: none;
   border-radius: 20px;
@@ -293,12 +586,13 @@ h1 {
   cursor: pointer;
 }
 
-.modal-buttons button:first-child {
+.menstrual-tracker-container .modal-buttons button:first-child {
   background: #ff6384;
   color: white;
 }
 
-.modal-buttons button:last-child {
+.menstrual-tracker-container .modal-buttons button:last-child {
   background: #ddd;
   color: #333;
 }
+

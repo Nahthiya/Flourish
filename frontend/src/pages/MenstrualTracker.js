@@ -30,6 +30,8 @@ function MenstrualTracker() {
     const [open, setOpen] = useState(false);
     const [username, setUsername] = useState('');
     const refOne = useRef(null);
+    const [calendarDate, setCalendarDate] = useState(new Date());
+    const [selectedDateSymptoms, setSelectedDateSymptoms] = useState(null);
 
     useEffect(() => {
         const fetchUsername = async () => {
@@ -128,25 +130,38 @@ function MenstrualTracker() {
 
     const getMarkedDates = () => {
         let markedDates = {};
+        
+        // Mark past period dates
         menstrualData.forEach((entry) => {
             let currentDate = parseISO(entry.start_date);
             const endDate = parseISO(entry.end_date);
             while (currentDate <= endDate) {
-                markedDates[format(currentDate, "yyyy-MM-dd")] = "past-period";
+                const formattedDate = format(currentDate, "yyyy-MM-dd");
+                markedDates[formattedDate] = markedDates[formattedDate] || []; // Initialize as array if not set
+                markedDates[formattedDate].push("past-period"); // Add past-period state
                 currentDate = addDays(currentDate, 1);
             }
         });
+    
+        // Mark predicted period dates
         if (predictions?.next_period_start) {
             let currentDate = parseISO(predictions.next_period_start);
             const endDate = parseISO(predictions.next_period_end);
             while (currentDate <= endDate) {
-                markedDates[format(currentDate, "yyyy-MM-dd")] = "predicted-period";
+                const formattedDate = format(currentDate, "yyyy-MM-dd");
+                markedDates[formattedDate] = markedDates[formattedDate] || []; // Initialize as array if not set
+                markedDates[formattedDate].push("predicted-period"); // Add predicted-period state
                 currentDate = addDays(currentDate, 1);
             }
         }
+    
+        // Mark symptom-logged dates
         symptomLogs.forEach((entry) => {
-            markedDates[entry.date] = "symptom-logged";
+            const formattedDate = entry.date;
+            markedDates[formattedDate] = markedDates[formattedDate] || []; // Initialize as array if not set
+            markedDates[formattedDate].push("symptom-logged"); // Add symptom-logged state
         });
+    
         return markedDates;
     };
 
@@ -179,11 +194,27 @@ function MenstrualTracker() {
                 },
                 period: {
                     labels,
-                    datasets: [{
-                        label: "Period Length (Days)",
-                        data: periodData,
-                        backgroundColor: "#36a2eb",
-                    }],
+                    datasets: [
+                        {
+                            label: "Period Length (Background)",
+                            data: periodData,
+                            backgroundColor: "#e6f0fa", // Very light blue
+                            barThickness: 40, // Thick bars
+                            borderWidth: 0,
+                            categoryPercentage: 0.8, // Control the width of the category (shared by both bars)
+                            barPercentage: 1.0, // Ensure the bar takes up the full category width
+                            borderWidth: 0,
+                        },
+                        {
+                            label: "Period Length (Overlay)",
+                            data: periodData,
+                            backgroundColor: "#addbfa", // Slightly darker blue
+                            barThickness: 20, // Thinner bars
+                            categoryPercentage: 0.8, // Match the background bar’s category width
+                            barPercentage: 0.5, // Make the bar take up 50% of the category width (centers it)
+                            borderWidth: 0,
+                        },
+                    ],
                 },
             });
         }
@@ -214,10 +245,42 @@ function MenstrualTracker() {
 
     const periodOptions = {
         responsive: true,
-        plugins: { legend: { display: true, labels: { color: "#000" } } },
+        maintainAspectRatio: false,
         scales: {
-            x: { title: { display: true, text: "Period Start Date", color: "#000" } },
-            y: { title: { display: true, text: "Period Length (Days)", color: "#000" }, beginAtZero: true },
+            x: {
+                title: {
+                    display: true,
+                    text: "Period Start Date",
+                    color: "#5e4b8b",
+                    font: { size: 14 },
+                },
+                grid: { display: false },
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: "Period Length (Days)",
+                    color: "#5e4b8b",
+                    font: { size: 14 },
+                },
+                beginAtZero: true,
+                max: Math.max(...menstrualData.map(cycle => cycle.period_length)) + 2,
+                ticks: { stepSize: 1 },
+            },
+        },
+        plugins: {
+            legend: { display: false }, // Hide legend since it’s a layered effect
+            tooltip: {
+                enabled: true,
+                callbacks: {
+                    label: (context) => `${context.raw} days`,
+                },
+            },
+        },
+        elements: {
+            bar: {
+                borderRadius: 5, // Rounded edges
+            },
         },
     };
 
@@ -265,9 +328,9 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
     const getCyclePhase = (cycleDay, cycleLength) => {
         const phases = [
             { name: "Menstrual", start: 1, end: 5, color: "#ff6384" },
-            { name: "Follicular", start: 6, end: Math.floor(cycleLength / 2), color: "#36a2eb" },
-            { name: "Ovulation", start: Math.floor(cycleLength / 2) + 1, end: Math.floor(cycleLength / 2) + 3, color: "#ffce56" },
-            { name: "Luteal", start: Math.floor(cycleLength / 2) + 4, end: cycleLength, color: "#5e4b8b" },
+            { name: "Follicular", start: 6, end: Math.floor(cycleLength / 2), color: "#95d0f9" },
+            { name: "Ovulation", start: Math.floor(cycleLength / 2) + 1, end: Math.floor(cycleLength / 2) + 3, color: "#ffe9b4" },
+            { name: "Luteal", start: Math.floor(cycleLength / 2) + 4, end: cycleLength, color: "#ae9dd5" },
         ];
         if (cycleDay <= 0 || !cycleDay || typeof cycleDay === "string") return { name: "Unknown", color: "#ccc" };
         // Adjust cycle day to loop within the cycle length
@@ -784,61 +847,161 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
     };
     
 
- return (
+    const calculatePastCycleStats = () => {
+        if (menstrualData.length < 2) {
+          return {
+            message: "Insufficient data to analyze past cycles",
+            prevCycleLength: "N/A",
+            prevPeriodLength: "N/A",
+            variation: "N/A"
+          };
+        }
+      
+        const lastCycles = menstrualData.slice(-6); // Last 6 cycles
+        const prevCycle = lastCycles[lastCycles.length - 1];
+        const prevCycleLength = prevCycle.cycle_length || differenceInDays(
+          parseISO(prevCycle.start_date),
+          parseISO(lastCycles[lastCycles.length - 2].start_date)
+        );
+        const prevPeriodLength = prevCycle.period_length;
+      
+        // Calculate variation (standard deviation of cycle lengths)
+        const cycleLengths = lastCycles.slice(1).map((cycle, index) => {
+          const prevCycle = lastCycles[index];
+          return differenceInDays(parseISO(cycle.start_date), parseISO(prevCycle.start_date));
+        });
+        
+        const mean = cycleLengths.reduce((a, b) => a + b, 0) / cycleLengths.length;
+        const variance = cycleLengths.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / cycleLengths.length;
+        const variation = Math.sqrt(variance).toFixed(1);
+      
+        // Normal range for cycle length is typically 21-35 days
+        // Normal variation is typically less than 7-9 days
+        const isNormal = prevCycleLength >= 21 && prevCycleLength <= 35 && variation < 9;
+      
+        return {
+          message: isNormal ? "Your past cycles seem to be on track ✔️" : "Your past cycles show some irregularity ❗",
+          prevCycleLength,
+          prevPeriodLength,
+          variation
+        };
+      };
+
+      return (
         <div className="menstrual-tracker-container">
+          {/* Header separated for transparency */}
+          <header className="tracker-header">
             <h1>{username ? `${username}'s Cycle Tracker` : "Cycle Tracker"}</h1>
+          </header>
+          {/* Main content below the background image */}
+          <div className="tracker-main-content">
+      <div className="tracker-content" style={{ display: 'flex', justifyContent: 'center' }}>
+        {/* Left Section - Cycle Summary */}
+        <div className="left-section" style={{ flex: '1' }}>
+          <div className="cycle-summary">
+          <h2>Cycle Summary <span role="img" aria-label="droplet">💧</span></h2>
             <div className="cycle-phase">
-                <h3>Current Phase: {currentPhase.name}</h3>
-                <progress
+  <h3>
+    You are currently in your{" "}
+    <span className="phase-name" style={{ color: currentPhase.color }}>
+      {currentPhase.name}
+    </span>{" "}
+    phase
+  </h3>
+  <progress
     value={currentCycleDay > 0 && typeof currentCycleDay === "number" ? currentCycleDay : 0}
     max={avgCycleLengthCalc}
     style={{ "--progress-color": currentPhase.color }}
-/>
+  />
+</div>
+            <div className="summary-details">
+            <div className="bubble">
+      <strong>Days Remaining for Period:</strong>
+      <span>{daysRemaining >= 0 ? daysRemaining : "N/A"}</span>
+    </div>
+    <div className="bubble">
+      <strong>Current Cycle Day:</strong>
+      <span>{currentCycleDay > 0 ? currentCycleDay : "N/A"}</span>
+    </div>
+  </div>
+            <div className="recent-symptoms">
+              <h3>Recent Symptoms</h3>
+              <div className="symptoms-list">
+                {getRecentSymptoms().length > 0 ? (
+                  getRecentSymptoms().map((symptom, index) => (
+                    <span key={index} className="symptom-tag">{symptom}</span>
+                  ))
+                ) : (
+                  <p>No recent symptoms logged.</p>
+                )}
+              </div>
             </div>
-            <div className="tracker-content">
-                <div className="left-section">
-                    <div className="cycle-summary">
-                        <h2>Cycle Summary</h2>
-                        <div className="summary-details">
-                            <p><strong>Days Remaining for Period:</strong> {daysRemaining >= 0 ? daysRemaining : "N/A"}</p>
-                            <p><strong>Current Cycle Day:</strong> {currentCycleDay > 0 ? currentCycleDay : "N/A"}</p>
-                        </div>
-                        <div className="recent-symptoms">
-                            <h3>Recent Symptoms</h3>
-                            <div className="symptoms-list">
-                                {getRecentSymptoms().length > 0 ? (
-                                    getRecentSymptoms().map((symptom, index) => (
-                                        <span key={index} className="symptom-tag">{symptom}</span>
-                                    ))
-                                ) : (
-                                    <p>No recent symptoms logged.</p>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="right-section">
-                    <div className="calendar-section">
-                        <h2>March 2025</h2>
-                        <Calendar
-                            defaultView="month"
-                            value={new Date(2025, 2, 1)}
-                            tileClassName={({ date }) => {
-                                const formattedDate = format(date, "yyyy-MM-dd");
-                                if (markedDates[formattedDate] === "past-period") return "past-period-day";
-                                if (markedDates[formattedDate] === "predicted-period") return "predicted-period-day";
-                                if (markedDates[formattedDate] === "symptom-logged") return "symptom-logged-day";
-                                return null;
-                            }}
-                            tileDisabled={() => true}
-                        />
-                        <div className="calendar-buttons">
-                            <button className="log-period-btn" onClick={() => setShowPeriodModal(true)}>Log Period</button>
-                            <button className="log-symptoms-btn" onClick={() => setShowSymptomModal(true)}>Log Symptoms</button>
-                        </div>
-                    </div>
-                </div>
+          </div>
+        </div>
+
+        {/* Middle Section - Calendar */}
+        <div className="middle-section" style={{ flex: '1' }}>
+          <div className="calendar-section">
+            <h2>{format(calendarDate, "MMMM yyyy")}</h2>
+            <Calendar
+              defaultView="month"
+              value={calendarDate}
+              onChange={(date) => setCalendarDate(date)}
+              tileClassName={({ date }) => {
+                const formattedDate = format(date, "yyyy-MM-dd");
+                const classes = [];
+                const dateMarks = markedDates[formattedDate] || [];
+
+                if (dateMarks.includes("past-period")) classes.push("past-period-day");
+                if (dateMarks.includes("predicted-period")) classes.push("predicted-period-day");
+                if (dateMarks.includes("symptom-logged")) classes.push("symptom-logged-day");
+
+                return classes.length > 0 ? classes : null;
+              }}
+              tileDisabled={() => false}
+              onClickDay={(date) => {
+                const formattedDate = format(date, "yyyy-MM-dd");
+                const symptoms = symptomLogs.find(log => log.date === formattedDate)?.symptoms || [];
+                setSelectedDateSymptoms({ date: formattedDate, symptoms });
+              }}
+            />
+            <div className="calendar-buttons">
+              <button className="log-period-btn" onClick={() => setShowPeriodModal(true)}>Log Period</button>
+              <button className="log-symptoms-btn" onClick={() => setShowSymptomModal(true)}>Log Symptoms</button>
             </div>
+          </div>
+        </div>
+
+{/* Right Section - Previous Cycle Stats */}
+<div className="right-section" style={{ flex: '1'}}>
+          <div className="cycle-stats">
+            <h2>Previous Cycle Stats</h2>
+            {(() => {
+              const stats = calculatePastCycleStats();
+              return (
+                <>
+                  <p className="stats-message">{stats.message}</p>
+                  <div className="stats-details">
+                    <div className="stat-item">
+                      <span className="stat-name">Previous Cycle Length</span>
+                      <span className="stat-value">{stats.prevCycleLength} days</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-name">Previous Period Length</span>
+                      <span className="stat-value">{stats.prevPeriodLength} days</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-name">Cycle Variation (6 months)</span>
+                      <span className="stat-value">{stats.variation} days</span>
+                    </div>
+                  </div>
+                  <img src="/images/stats.jpg" alt="Cycle Stats Illustration" className="stats-image" />
+                </>
+              );
+            })()}
+          </div>
+        </div>
+      </div>
             <div className="insights-section">
                 <h2>Cycle Insights</h2>
                 <div className="insights-cards">
@@ -853,27 +1016,31 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
                 </div>
             </div>
             <div className="charts-section">
-                <div className="chart">
-                    <h3>Cycle Length Trends</h3>
-                    {chartData.cycle && <Line data={chartData.cycle} options={cycleOptions} />}
-                </div>
-                <div className="chart">
-                    <h3>Period Length Trends</h3>
-                    {chartData.period && <Bar data={chartData.period} options={periodOptions} />}
-                </div>
-            </div>
+  <div className="chart">
+    <h3>Cycle Length Trends</h3>
+    {chartData.cycle && <Line data={chartData.cycle} options={cycleOptions} />}
+  </div>
+  <div className="chart period-length-chart"> {/* Added specific class */}
+    <h3>Period Length Trends</h3>
+    {chartData.period && <Bar data={chartData.period} options={periodOptions} />}
+  </div>
+</div>
             <div className="export-section">
-                <h2>Export & Reports</h2>
-                <p>Download your cycle data for personal records or to share with healthcare providers. Our reports include comprehensive insights about your cycle patterns and symptoms.</p>
-                <div className="export-buttons">
-                    <button className="export-btn" onClick={handleDownloadPDF} disabled={loading}>
-                        {loading ? "Generating..." : "Download PDF Report"}
-                    </button>
-                    <button className="export-btn" onClick={handleDownloadCSV} disabled={loading}>
-                        {loading ? "Exporting..." : "Export Data as CSV"}
-                    </button>
-                </div>
-            </div>
+  <h2>Export & Reports</h2>
+  <p>
+    Generate detailed reports of your menstrual cycle data for personal records or to share with your healthcare provider. 
+    The <strong>PDF report</strong> includes a summary of your cycle history, average cycle and period lengths, and a detailed analysis of symptom trends.
+    The <strong>CSV export</strong> provides raw data in a spreadsheet format, including dates, cycle lengths, period durations, and logged symptoms for easy analysis.
+  </p>
+  <div className="export-buttons">
+    <button className="export-btn" onClick={handleDownloadPDF} disabled={loading}>
+      {loading ? "Generating..." : "Download PDF Report"}
+    </button>
+    <button className="export-btn" onClick={handleDownloadCSV} disabled={loading}>
+      {loading ? "Exporting..." : "Export Data as CSV"}
+    </button>
+  </div>
+</div>
             {showPeriodModal && (
                 <div className="modal-overlay">
                     <div className="modal-content">
@@ -913,7 +1080,34 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
                     selectedDate={new Date()}
                 />
             )}
-        </div>
+            {selectedDateSymptoms && (
+            <div className="symptom-overlay">
+                <div className="symptom-content">
+                    <h3>Symptoms for {format(parseISO(selectedDateSymptoms.date), "MMMM d, yyyy")}</h3>
+                    {selectedDateSymptoms.symptoms.length > 0 ? (
+                        <ul>
+                            {selectedDateSymptoms.symptoms.map((symptom, index) => (
+                                <li key={index}>{symptom}</li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>No symptoms logged for this date.</p>
+                    )}
+                    <button
+                        className="log-symptoms-btn"
+                        onClick={() => {
+                            setShowSymptomModal(true);
+                            setSelectedDateSymptoms(null);
+                        }}
+                    >
+                        Log Symptoms
+                    </button>
+                    <button onClick={() => setSelectedDateSymptoms(null)}>Close</button>
+                </div>
+            </div>
+        )}
+    </div>
+    </div>    
     );
 }
 
