@@ -18,8 +18,10 @@ function SymptomTracker({ onSymptomsLogged, onClose, selectedDate: initialDate }
     const fetchLoggedSymptoms = useCallback(async () => {
         try {
             const response = await axiosInstance.get("/users/symptom-logs/");
-            console.log("Fetched symptom logs:", response.data);
-            setLoggedSymptoms(response.data);
+            const sortedLogs = response.data
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 5); // Only keep last 5 entries
+            setLoggedSymptoms(sortedLogs);
         } catch (error) {
             console.error("Error fetching logged symptoms:", error);
         }
@@ -95,14 +97,19 @@ function SymptomTracker({ onSymptomsLogged, onClose, selectedDate: initialDate }
                     ))}
                 </div>
                 <div className="logged-symptoms">
-                    <h3>Previously Logged Symptoms</h3>
-                    <ul>
-                        {loggedSymptoms.map((log, index) => (
-                            <li key={index}>
-                                <strong>{log.date}:</strong> {log.symptoms.join(", ")} {log.cycle_day ? `(Cycle Day: ${log.cycle_day})` : "(Cycle Day: Not calculated)"}
-                            </li>
-                        ))}
-                    </ul>
+                    <h3>Recently Logged Symptoms (Last 5)</h3>
+                    {loggedSymptoms.length > 0 ? (
+                        <ul>
+                            {loggedSymptoms.map((log, index) => (
+                                <li key={index}>
+                                    <strong>{log.date}:</strong> {log.symptoms.join(", ")} 
+                                    {log.cycle_day && ` (Cycle Day: ${log.cycle_day})`}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>No symptoms logged recently.</p>
+                    )}
                 </div>
                 <div className="modal-buttons">
                     <button className="save-btn" onClick={handleSaveSymptoms}>Save Symptoms</button>

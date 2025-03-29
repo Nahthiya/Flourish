@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { fetchArticles, fetchCategories } from "../utils/api";
-import "./ArticleList.css"; // Import CSS file
+import "./ArticleList.css";
 
 const ArticleList = () => {
   const [articles, setArticles] = useState([]);
@@ -34,38 +34,52 @@ const ArticleList = () => {
 
   return (
     <div className="article-container">
-      <h2 className="title">Educational Articles</h2>
+      <h2 className="title">Stay Informed, Stay Healthy</h2>
+      <p className="subtitle">
+        Explore research-backed articles on women's health, wellness, and more.
+      </p>
 
       <div className="filter-section" data-results={resultsCount}>
-        <input
-          type="text"
-          placeholder="Search articles..."
-          className="search-bar"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select className="category-select" onChange={(e) => setCategory(e.target.value)}>
-          <option value="">All Categories</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.name}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-      </div>
+  <input
+    type="text"
+    placeholder="Search articles..."
+    className="search-bar"
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+  />
+  <select
+    className="category-select"
+    onChange={(e) => setCategory(e.target.value)}
+  >
+    <option value="">All Categories</option>
+    {categories.map((cat) => (
+      <option key={cat.id} value={cat.name}>
+        {cat.name}
+      </option>
+    ))}
+  </select>
+</div>
 
       <div className="article-grid">
         {articles.length > 0 ? (
           articles.map((article) => (
             <div key={article.id} className="article-card">
-              <div className="article-content" data-category={article.categories[0]?.name || "General"}>
+              <div
+                className="article-content"
+                data-category={article.categories[0]?.name || "General"}
+              >
                 <h3 className="article-title">{article.title}</h3>
                 <p className="article-summary">
                   {article.content
                     ? clean_html(article.content).substring(0, 100) + "..."
                     : "Learn more about this topic..."}
                 </p>
-                <a href={article.url} className="read-more" target="_blank" rel="noopener noreferrer">
+                <a
+                  href={article.url}
+                  className="read-more"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Read More
                 </a>
               </div>

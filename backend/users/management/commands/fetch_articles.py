@@ -8,7 +8,6 @@ from bs4 import BeautifulSoup
 import time
 import logging
 
-# Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -69,7 +68,7 @@ def clean_html(raw_html):
     if not raw_html:
         return ""
     soup = BeautifulSoup(raw_html, "html.parser")
-    clean_text = soup.get_text(separator=" ")  # Extracts visible text and maintains spacing
+    clean_text = soup.get_text(separator=" ") 
     return clean_text.strip()
 
 class Command(BaseCommand):
@@ -87,12 +86,12 @@ class Command(BaseCommand):
         for attempt in range(retries):
             try:
                 response = requests.get(url, params=params, timeout=30)
-                response.raise_for_status()  # Raise an exception for bad status codes
+                response.raise_for_status() 
                 return response
             except requests.RequestException as e:
                 logger.warning(f"Attempt {attempt + 1}/{retries} failed for {url}: {e}")
                 if attempt < retries - 1:
-                    time.sleep(delay * (2 ** attempt))  # Exponential backoff
+                    time.sleep(delay * (2 ** attempt))  
                 else:
                     logger.error(f"Failed to fetch from {url} after {retries} attempts: {e}")
                     return None
@@ -116,7 +115,7 @@ class Command(BaseCommand):
             articles = data.get("Result", {}).get("Resources", {}).get("Resource", [])
 
             for item in articles:
-                title = item.get("Title", "")[:200]  # Limit title to 200 characters
+                title = item.get("Title", "")[:200]  
                 if Article.objects.filter(title=title, source="HealthFinder").exists():
                     logger.info(f"Skipping duplicate HealthFinder article: {title}")
                     continue
@@ -126,10 +125,10 @@ class Command(BaseCommand):
                     logger.info(f"Skipping HealthFinder article '{title}' due to empty or invalid summary")
                     continue
 
-                url = item.get("AccessibleVersion", "")[:200]  # Limit URL to 200 characters
+                url = item.get("AccessibleVersion", "")[:200]  
                 image_url = item.get("ImageUrl", None)
                 if image_url:
-                    image_url = image_url[:200]  # Limit image URL to 200 characters
+                    image_url = image_url[:200]  
                 published_date = now()
                 
                 category_name = "General Health"
@@ -156,7 +155,7 @@ class Command(BaseCommand):
                     logger.info(f"Added HealthFinder article: {title} (Category: {category_name})")
 
             logger.info(f"Successfully fetched HealthFinder articles for keyword: {keyword}")
-            time.sleep(0.5)  # Delay to avoid rate limiting
+            time.sleep(0.5)  
 
     def fetch_wikipedia_articles(self):
         """ Fetch articles from Wikipedia API in batches of 10 keywords """
@@ -184,7 +183,7 @@ class Command(BaseCommand):
             logger.info(f"Found {len(pages)} pages in batch {i//batch_size + 1}")
 
             for page_id, page_info in pages.items():
-                title = page_info.get("title", "")[:200]  # Limit title to 200 characters
+                title = page_info.get("title", "")[:200]  
                 if Article.objects.filter(title=title, source="Wikipedia").exists():
                     logger.info(f"Skipping duplicate Wikipedia article: {title}")
                     continue
@@ -194,10 +193,10 @@ class Command(BaseCommand):
                     logger.info(f"Skipping Wikipedia article '{title}' due to empty or invalid summary")
                     continue
 
-                url = f"https://en.wikipedia.org/wiki/{title.replace(' ', '_')}"[:200]  # Limit URL to 200 characters
+                url = f"https://en.wikipedia.org/wiki/{title.replace(' ', '_')}"[:200]  
                 image_url = page_info.get("thumbnail", {}).get("source", None)
                 if image_url:
-                    image_url = image_url[:200]  # Limit image URL to 200 characters
+                    image_url = image_url[:200]  
                 published_date = now()
                 
                 category_name = "General Health"
@@ -230,7 +229,7 @@ class Command(BaseCommand):
         """ Fetch articles from PubMed API and store them """
         logger.info("Fetching articles from PubMed...")
         for keyword in EXPANDED_KEYWORDS:
-            # Step 1: Search for articles
+            # Search for articles
             search_params = {
                 "db": "pubmed",
                 "term": f"{keyword}[Title/Abstract]",
@@ -253,7 +252,7 @@ class Command(BaseCommand):
                 logger.info(f"No articles found for keyword '{keyword}'")
                 continue
 
-            # Step 2: Fetch article details
+            # Fetch article details
             fetch_params = {
                 "db": "pubmed",
                 "id": ",".join(id_list),

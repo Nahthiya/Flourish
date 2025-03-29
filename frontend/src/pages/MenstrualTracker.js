@@ -112,28 +112,124 @@ function MenstrualTracker() {
 
     //save period
     const handleSavePeriod = async () => {
+        const startDate = selectedRange[0].startDate;
+        const endDate = selectedRange[0].endDate;
+        
+        // Close the modal first
+        setShowPeriodModal(false);
+      
+        const toastId = toast(
+          <div style={{ 
+            textAlign: 'center',
+            padding: '10px'
+          }}>
+            <p style={{
+              color: '#333',
+              marginBottom: '15px',
+              fontSize: '15px',
+              fontWeight: '500'
+            }}>
+              Are you sure you've selected the correct period dates?
+            </p>
+            <p style={{
+              color: '#5e4b8b',
+              marginBottom: '20px',
+              fontSize: '14px',
+              fontStyle: 'italic'
+            }}>
+              {format(startDate, "MMM d, yyyy")} to {format(endDate, "MMM d, yyyy")}
+            </p>
+            <div style={{ 
+              display: 'flex',
+              justifyContent: 'center',
+              gap: '15px'
+            }}>
+              <button 
+                onClick={() => {
+                  toast.dismiss(toastId);
+                  confirmSavePeriod();
+                }}
+                style={{
+                  padding: '8px 20px',
+                  background: '#ff6384',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseOver={(e) => e.target.style.background = '#e04f70'}
+                onMouseOut={(e) => e.target.style.background = '#ff6384'}
+              >
+                Confirm
+              </button>
+              <button 
+                onClick={() => {
+                  toast.dismiss(toastId);
+                  setShowPeriodModal(true); // Reopen modal if canceled
+                }}
+                style={{
+                  padding: '8px 20px',
+                  background: 'transparent',
+                  color: '#5e4b8b',
+                  border: '1px solid #ddd',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseOver={(e) => e.target.style.background = '#f5f5f5'}
+                onMouseOut={(e) => e.target.style.background = 'transparent'}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>,
+          {
+            position: "top-center",
+            autoClose: false,
+            closeOnClick: false,
+            draggable: false,
+            closeButton: false,
+            style: {
+              background: '#fff',
+              width: '320px',
+              borderRadius: '12px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+            },
+            bodyStyle: {
+              padding: 0
+            }
+          }
+        );
+      };
+      
+      const confirmSavePeriod = async () => {
         setLoading(true);
         const startDate = selectedRange[0].startDate;
         const endDate = selectedRange[0].endDate;
         const periodLength = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-
+      
         try {
-            await axiosInstance.post("/users/menstrual-data/", {
-                start_date: format(startDate, "yyyy-MM-dd"),
-                end_date: format(endDate, "yyyy-MM-dd"),
-                period_length: periodLength,
-            });
-            toast.success("Period saved successfully");
-            setShowPeriodModal(false);
-            fetchData();
-            fetchPredictions();
+          await axiosInstance.post("/users/menstrual-data/", {
+            start_date: format(startDate, "yyyy-MM-dd"),
+            end_date: format(endDate, "yyyy-MM-dd"),
+            period_length: periodLength,
+          });
+          toast.success("Period saved successfully");
+          fetchData();
+          fetchPredictions();
         } catch (error) {
-            console.error("Error saving period data:", error);
-            toast.error("Failed to save period data");
+          console.error("Error saving period data:", error);
+          toast.error("Failed to save period data");
+          setShowPeriodModal(true); // Reopen modal if error occurs
         } finally {
-            setLoading(false);
+          setLoading(false);
         }
-    };
+      };
 
     //marked dates
     const getMarkedDates = () => {
@@ -1060,11 +1156,11 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
                             )}
                         </div>
                         <div className="modal-buttons">
-                            <button onClick={handleSavePeriod} disabled={loading}>
-                                {loading ? "Saving..." : "Save Period"}
-                            </button>
-                            <button onClick={() => setShowPeriodModal(false)}>Close</button>
-                        </div>
+  <button onClick={handleSavePeriod} disabled={loading}>
+    {loading ? "Saving..." : "Save Period"}
+  </button>
+  <button onClick={() => setShowPeriodModal(false)}>Close</button>
+</div>
                     </div>
                 </div>
             )}
