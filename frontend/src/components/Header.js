@@ -9,11 +9,24 @@ function Header({ isAuthenticated }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    axiosInstance.post('/users/logout/')
+    const refreshToken = localStorage.getItem('refreshToken');
+    
+    axiosInstance.post('/users/logout/', { refresh: refreshToken })
       .then(() => {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        
+        delete axiosInstance.defaults.headers['Authorization'];
+        
         navigate('/signin-signup');
       })
-      .catch(error => console.error("Error logging out:", error));
+      .catch(error => {
+        console.error("Error logging out:", error);
+      
+        localStorage.clear();
+        navigate('/signin-signup');
+      });
   };
 
   return (
@@ -27,7 +40,7 @@ function Header({ isAuthenticated }) {
               <Link to="/chatbot">Chatbot</Link>
               <Link to="/hub">Hub</Link>
               <Link to="/tracker">Tracker</Link>
-              <Link to="/#about">About</Link>
+              <Link to="/about">About</Link>
               <Link to="/profile">Profile</Link>
             </>
           ) : (

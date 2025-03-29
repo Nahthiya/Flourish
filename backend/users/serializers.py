@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import CustomUser
 from .models import MenstrualData
 from .models import SymptomLog
-from .models import Article, Category
+from .models import Article, Category, ContactSubmission
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,3 +30,8 @@ class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = "__all__"
+
+class ContactSubmissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactSubmission
+        fields = ['name', 'email', 'message']

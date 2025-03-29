@@ -14,4 +14,5 @@ urlpatterns = [
     path('api/chatbot/', chatbot_response, name='chatbot'),
     path('api/csrf-token/', get_csrf_token, name='csrf-token'),
     path('users/auth-status/', AuthStatusView.as_view(), name='auth-status'),
+    path('api/', include('users.urls')),
 ]

@@ -34,11 +34,12 @@ import uuid
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from .models import MenstrualData
-from .serializers import MenstrualDataSerializer
+from .serializers import MenstrualDataSerializer, ContactSubmissionSerializer
 from .models import ChatSession, Message
-from users.models import Article, Category
-from .serializers import ArticleSerializer, CategorySerializer
+from users.models import Article, Category, ContactSubmission
+from .serializers import ArticleSerializer, CategorySerializer, ContactSubmissionSerializer
 from django.db.models import Q
+
 
 logger = logging.getLogger(__name__)
 
@@ -591,3 +592,19 @@ class SymptomReportView(APIView):
             "symptoms_by_cycle_day": symptoms_by_cycle_day,
             "symptom_ranges": symptom_ranges
         }, status=status.HTTP_200_OK)
+    
+
+from rest_framework.views import APIView
+from .serializers import ContactSubmissionSerializer
+from rest_framework.response import Response
+from rest_framework import status
+
+class ContactSubmissionView(APIView):
+    permission_classes = []  # Allow unauthenticated access
+
+    def post(self, request):
+        serializer = ContactSubmissionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Thank you! Your message has been submitted."}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -9,6 +9,7 @@ import MenstrualTracker from './pages/MenstrualTracker';
 import ProtectedRoute from './utils/ProtectedRoute';
 import ChatbotPage from './pages/ChatbotPage';
 import HubPage from './pages/HubPage';
+import AboutPage from './pages/AboutPage'; 
 import axiosInstance from './axiosInstance';
 import { ToastContainer } from 'react-toastify'; 
 import 'react-toastify/dist/ReactToastify.css'; 
@@ -98,6 +99,7 @@ function App() {
             } 
           />
           <Route path="/chatbot" element={<ChatbotPage />} />
+          <Route path="/about" element={<AboutPage />} />
         </Routes>
         <Footer />
       </div>
