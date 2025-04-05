@@ -109,7 +109,7 @@ axiosInstance.interceptors.response.use(
               
                 localStorage.removeItem("accessToken");
                 localStorage.removeItem("refreshToken");
-                window.location.href = "/signin-signup";
+                window.location.href = "/";
             }
         }
         return Promise.reject(error);

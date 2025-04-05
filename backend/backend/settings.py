@@ -182,7 +182,8 @@ CSRF_COOKIE_HTTPONLY = False
 CSRF_USE_SESSIONS = False  
 CSRF_COOKIE_SECURE = False  
 
-
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'backend', 'media')
 
 GOOGLE_APPLICATION_CREDENTIALS = os.path.join(BASE_DIR, "config/dialogflow-key.json")
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS

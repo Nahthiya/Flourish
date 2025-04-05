@@ -2,7 +2,7 @@
 .menstrual-tracker-container {
   flex: 1;
   padding: 20px;
-  background:linear-gradient(to bottom, #eeedee, #ffffff);
+  background:linear-gradient(to bottom, #c0bcdd, #ffffff);
   min-height: 100vh; 
   position: relative; 
 }
@@ -18,7 +18,7 @@
 }
 
 .menstrual-tracker-container .tracker-header h1 {
-  color: #083b54; 
+  color: #050c2a; 
   font-size: 22px;
   margin-top: 80px;
   font-family: "Poppins";

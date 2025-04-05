@@ -39,7 +39,8 @@ from .models import ChatSession, Message
 from users.models import Article, Category, ContactSubmission
 from .serializers import ArticleSerializer, CategorySerializer, ContactSubmissionSerializer
 from django.db.models import Q
-
+from django.contrib.auth.hashers import check_password, make_password
+from django.core.files.storage import default_storage
 
 logger = logging.getLogger(__name__)
 
@@ -530,6 +531,7 @@ class AuthStatusView(APIView):
             "username": request.user.username,
             "email": request.user.email,
             "preferred_bot_name": request.user.preferred_bot_name,
+            "date_joined": request.user.date_joined,
         }, status=status.HTTP_200_OK)
     
 class UpdateBotNameView(APIView):
@@ -600,7 +602,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 class ContactSubmissionView(APIView):
-    permission_classes = []  # Allow unauthenticated access
+    permission_classes = [] 
 
     def post(self, request):
         serializer = ContactSubmissionSerializer(data=request.data)
@@ -608,3 +610,75 @@ class ContactSubmissionView(APIView):
             serializer.save()
             return Response({"message": "Thank you! Your message has been submitted."}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UploadAvatarView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        if 'avatar' not in request.FILES:
+            return Response(
+                {"error": "No avatar file provided"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if user.avatar_url:
+            old_avatar_path = user.avatar_url.replace(settings.MEDIA_URL, '')
+            full_old_avatar_path = os.path.join(settings.MEDIA_ROOT, old_avatar_path)
+            if default_storage.exists(full_old_avatar_path):
+                default_storage.delete(full_old_avatar_path)
+
+        avatar_file = request.FILES['avatar']
+        file_name = f"avatars/{user.id}_{avatar_file.name}"
+        file_path = default_storage.save(file_name, avatar_file)
+        avatar_url = f"{settings.MEDIA_URL}{file_path}"
+        print(f"Saving avatar_url for user {user.id}: {avatar_url}")  # Debug
+
+        user.avatar_url = avatar_url
+        user.save()
+        print(f"Updated user avatar_url in database: {user.avatar_url}")  # Debug
+
+        return Response(
+            {"avatarUrl": avatar_url},
+            status=status.HTTP_200_OK
+        )
+    
+class UpdateProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        data = request.data
+        
+        user.username = data.get('username', user.username)
+        user.email = data.get('email', user.email)
+        user.save()
+        
+        return Response({"message": "Profile updated"}, status=status.HTTP_200_OK)
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        data = request.data
+        
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+        
+        if not check_password(current_password, user.password):
+            return Response({"message": "Current password is incorrect"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        user.password = make_password(new_password)
+        user.save()
+        
+        return Response({"message": "Password changed successfully"}, status=status.HTTP_200_OK)
+
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+        user.delete()
+        return Response({"message": "Account deleted"}, status=status.HTTP_200_OK)

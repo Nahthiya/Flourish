@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import './AboutPage.css';
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const AboutPage = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -20,7 +22,7 @@ const AboutPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-    const response = await fetch('http://localhost:8000/api/contact/',  { 
+        const response = await fetch(`${API_URL}/contact/`,  { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

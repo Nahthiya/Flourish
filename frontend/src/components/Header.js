@@ -19,13 +19,13 @@ function Header({ isAuthenticated }) {
         
         delete axiosInstance.defaults.headers['Authorization'];
         
-        navigate('/signin-signup');
+        navigate('/');
       })
       .catch(error => {
         console.error("Error logging out:", error);
       
         localStorage.clear();
-        navigate('/signin-signup');
+        navigate('/');
       });
   };
 
@@ -45,11 +45,11 @@ function Header({ isAuthenticated }) {
             </>
           ) : (
             <>
-              <Link to="/signin-signup">Home</Link>
-              <Link to="/signin-signup">Chatbot</Link>
-              <Link to="/signin-signup">Hub</Link>
-              <Link to="/signin-signup">Tracker</Link>
-              <Link to="/signin-signup">About</Link>
+              <Link to="/">Home</Link>
+              <Link to="/">Chatbot</Link>
+              <Link to="/">Hub</Link>
+              <Link to="/">Tracker</Link>
+              <Link to="/">About</Link>
             </>
           )}
         </nav>
