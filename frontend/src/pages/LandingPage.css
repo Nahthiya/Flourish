@@ -343,9 +343,9 @@ color: #592828;
 }
 
 .cta-button {
-  background: #eeeeee;
+  background: #937c7c;
   color: black;
-  padding: 15px 30px;
+  padding: 10px 15px;
   font-family: "Aboreto", serif;
   font-size: 1.6rem;
   font-weight: bold;
@@ -354,6 +354,13 @@ color: #592828;
   text-decoration: none;
   display: inline-block;
   transition: background 0.3s ease-in-out;
+}
+
+.landing-page .cta-button {
+  width: max-content;  
+  max-width: 400px;   
+  padding: 15px 30px;  
+  display: inline-block;
 }
 
 .cta-button:hover {

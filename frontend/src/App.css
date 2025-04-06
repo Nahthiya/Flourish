@@ -7,7 +7,6 @@
   pointer-events: none;
 }
 
-
 .Toastify__toast {
   border-radius: 8px;
   font-family: "Aboreto", serif;
@@ -16,16 +15,17 @@
 }
 
 .Toastify__toast-body {
-  font-weight: bold; 
+  font-weight: bold;
 }
+
 .Toastify__toast--success {
   background-color: #ffffff;
   color: #1f1616;
 }
 
 .Toastify__toast--error {
-  background-color: #FF5252;
-  color: #FFFFFF;
+  background-color: #ffffff; /* White background for error toasts */
+  color: #000000; /* Black text for error toasts */
 }
 
 .Toastify__toast--info {

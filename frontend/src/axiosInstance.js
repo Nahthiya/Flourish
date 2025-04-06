@@ -3,14 +3,14 @@ import axios from "axios";
 // get API URL from environment variable
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000/api";
 
-let csrfToken = null; 
+let csrfToken = null;
 
 // function to dynamically fetch CSRF token and store it in cookies
 const fetchCsrfToken = async () => {
-    if (csrfToken) return csrfToken; 
+    if (csrfToken) return csrfToken;
     try {
         const response = await axios.get(`${API_URL}/users/csrf-token/`, {
-            withCredentials: true, 
+            withCredentials: true,
         });
 
         csrfToken = response.data.csrfToken || response.data.token; // store token
@@ -27,6 +27,7 @@ const fetchCsrfToken = async () => {
         return null;
     }
 };
+
 // refresh token
 const refreshToken = async () => {
     const refreshToken = localStorage.getItem("refreshToken");
@@ -60,7 +61,7 @@ const axiosInstance = axios.create({
     headers: {
         "Content-Type": "application/json",
     },
-    withCredentials: true, 
+    withCredentials: true,
 });
 
 // request interceptor to ensure CSRF and Authorization tokens are included
@@ -96,17 +97,20 @@ axiosInstance.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
         
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // Skip redirect for login and signup requests
+        const isLoginOrSignupRequest = 
+            originalRequest.url.includes("/users/login/") || 
+            originalRequest.url.includes("/users/register/");
+
+        if (error.response?.status === 401 && !originalRequest._retry && !isLoginOrSignupRequest) {
             originalRequest._retry = true;
             
             const success = await refreshToken();
             if (success) {
-              
                 const newAccessToken = localStorage.getItem("accessToken");
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
                 return axiosInstance(originalRequest);
             } else {
-              
                 localStorage.removeItem("accessToken");
                 localStorage.removeItem("refreshToken");
                 window.location.href = "/";
@@ -115,6 +119,7 @@ axiosInstance.interceptors.response.use(
         return Promise.reject(error);
     }
 );
+
 // fetch CSRF token when the app loads 
 fetchCsrfToken();
 

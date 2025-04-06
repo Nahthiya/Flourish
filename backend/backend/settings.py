@@ -11,7 +11,11 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 import os
+import environ
+env = environ.Env()
+environ.Env.read_env() 
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -64,6 +68,15 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',  
     ],
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=20),  
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),     
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': False,
+    'UPDATE_LAST_LOGIN': True,
+    'OUTSTANDING_TOKEN_MODEL': 'users.CustomOutstandingToken',
 }
 
 MIDDLEWARE = [
@@ -189,6 +202,7 @@ GOOGLE_APPLICATION_CREDENTIALS = os.path.join(BASE_DIR, "config/dialogflow-key.j
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS
 
 DIALOGFLOW_PROJECT_ID = "flourish-448006"
+OPENAI_API_KEY = env("OPENAI_API_KEY")
 
 LOGGING = {
     'version': 1,

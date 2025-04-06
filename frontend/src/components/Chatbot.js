@@ -5,7 +5,6 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const userAvatar = "/images/user-avatar.png";  
 const botAvatar = "/images/flower.png"; 
 
 const Chatbot = ({ isFullPage }) => {
@@ -18,6 +17,7 @@ const Chatbot = ({ isFullPage }) => {
   const [botName, setBotName] = useState("Luna");
   const [isEditingBotName, setIsEditingBotName] = useState(false);
   const [newBotName, setNewBotName] = useState(botName);
+  const [userAvatar, setUserAvatar] = useState("/images/user-avatar.png");
 
   useEffect(() => {
     const getCsrfToken = async () => {
@@ -208,6 +208,25 @@ const Chatbot = ({ isFullPage }) => {
         const response = await axiosInstance.get("/users/users/auth-status/");
         if (response.data.authenticated) {
           setBotName(response.data.preferred_bot_name || "Luna");
+          
+          if (response.data.avatar_url && response.data.avatar_url !== '') {
+            const BASE_URL = 'http://localhost:8000';
+            const timestamp = Date.now();
+            const avatarUrl = response.data.avatar_url.startsWith('http') 
+              ? `${response.data.avatar_url}?t=${timestamp}` 
+              : `${BASE_URL}${response.data.avatar_url}?t=${timestamp}`;
+            setUserAvatar(avatarUrl);
+          } else {
+            const storedAvatarUrl = localStorage.getItem('userAvatarUrl');
+            if (storedAvatarUrl) {
+              const BASE_URL = 'http://localhost:8000';
+              const timestamp = Date.now();
+              const avatarUrl = storedAvatarUrl.startsWith('http')
+                ? `${storedAvatarUrl}?t=${timestamp}`
+                : `${BASE_URL}${storedAvatarUrl}?t=${timestamp}`;
+              setUserAvatar(avatarUrl);
+            }
+          }
         }
       } catch (error) {
         console.error("Failed to fetch user data:", error);
@@ -330,19 +349,27 @@ const Chatbot = ({ isFullPage }) => {
               To prioritize your privacy and confidentiality, we only store your last 10 conversations. This ensures that your sensitive information is not stored indefinitely.
             </div>
             {messages.map((msg, index) => (
-              <div key={index} className={`message-container ${msg.sender}`}>
-                {msg.sender === 'bot' && (
-                  <img src={botAvatar} alt="Bot Avatar" className="chat-avatar bot-avatar" />
-                )}
-                <div className={`message ${msg.sender}`}>
-                  <p>{msg.text}</p>
-                  <span className="message-time">{new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                </div>
-                {msg.sender === 'user' && (
-                  <img src={userAvatar} alt="User Avatar" className="chat-avatar user-avatar" />
-                )}
-              </div>
-            ))}
+    <div key={index} className={`message-container ${msg.sender}`}>
+      {msg.sender === 'bot' && (
+        <img src={botAvatar} alt="Bot Avatar" className="chat-avatar bot-avatar" />
+      )}
+      <div className={`message ${msg.sender}`}>
+        <p>{msg.text}</p>
+        <span className="message-time">{new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+      </div>
+      {msg.sender === 'user' && (
+        <img 
+          src={userAvatar} 
+          alt="User Avatar" 
+          className="chat-avatar user-avatar" 
+          onError={(e) => {
+            e.target.onerror = null; 
+            e.target.src = "/images/user-avatar.png"; 
+          }}
+        />
+      )}
+    </div>
+  ))}
             {isTyping && (
               <div className="message-container bot">
                 <img src={botAvatar} alt="Bot Avatar" className="chat-avatar bot-avatar" />

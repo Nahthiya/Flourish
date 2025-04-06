@@ -390,13 +390,15 @@ credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCO
 # Dialogflow project ID
 DIALOGFLOW_PROJECT_ID = 'flourish-448006'  # Replace with your actual project ID
 
-USE_GPT_FALLBACK = False
+USE_GPT_FALLBACK = True
 
-# Load OpenAI API Key (Only works when activated)
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# Load OpenAI API Key
+OPENAI_API_KEY = settings.OPENAI_API_KEY
 
-if OPENAI_API_KEY:
-    openai.api_key = OPENAI_API_KEY
+# Check if OpenAI API key is loaded
+print(f"OpenAI API Key exists: {bool(OPENAI_API_KEY)}")
+print(f"OpenAI API Key first 5 chars: {OPENAI_API_KEY[:5] if OPENAI_API_KEY else 'None'}")
+print(f"USE_GPT_FALLBACK setting: {USE_GPT_FALLBACK}")
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -453,6 +455,8 @@ def chatbot_response(request):
     user_message = data.get("message", "")
     session_id = data.get("session_id")
 
+    print(f"📝 Received message: '{user_message}' for session {session_id}")
+
     if not session_id:
         return JsonResponse({"error": "No session ID provided"}, status=400)
 
@@ -463,6 +467,7 @@ def chatbot_response(request):
     Message.objects.create(chat=chat_session, sender="user", text=user_message)
 
     # Send message to Dialogflow
+    print("📡 Sending message to Dialogflow...")
     session_client = dialogflow.SessionsClient(credentials=credentials)
     session = session_client.session_path(DIALOGFLOW_PROJECT_ID, session_id)
     text_input = dialogflow.TextInput(text=user_message, language_code="en")
@@ -470,10 +475,30 @@ def chatbot_response(request):
     response = session_client.detect_intent(request={"session": session, "query_input": query_input})
 
     bot_reply = response.query_result.fulfillment_text or "I didn't understand that."
+    intent_name = response.query_result.intent.display_name
 
-    # Fallback to GPT-3.5 if Dialogflow fails
-    if USE_GPT_FALLBACK and bot_reply in ["I don't understand", ""]:
+    print(f"🤖 Dialogflow replied: '{bot_reply}', Intent: '{intent_name}'")
+
+    # List of Dialogflow fallback responses
+    fallback_responses = [
+        "I don't understand", 
+        "", 
+        "What was that?",
+        "I didn't get that. Can you say it again?",
+        "I missed what you said.",
+        "What was that?",
+        "Sorry, what was that?",
+        "I missed that, say that again?"
+    ]
+
+    # Fallback to GPT-3.5 if Dialogflow returns a fallback response
+    is_fallback = bot_reply in fallback_responses or intent_name == "Default Fallback Intent"
+    print(f"🔄 Should use GPT fallback? {is_fallback}")
+
+    if USE_GPT_FALLBACK and is_fallback:
+        print("🔄 Triggering GPT fallback...")
         bot_reply = get_gpt_response(user_message)
+        print(f"🔄 Final bot reply after fallback: '{bot_reply[:30]}...'")
 
     # Store bot response
     Message.objects.create(chat=chat_session, sender="bot", text=bot_reply)
@@ -483,20 +508,54 @@ def chatbot_response(request):
 
 def get_gpt_response(user_message):
     """Fallback to OpenAI GPT-3.5 if Dialogflow fails."""
-    if not OPENAI_API_KEY or not USE_GPT_FALLBACK:
-        return "I'm sorry, but I cannot respond at the moment."
-
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "system", "content": "You are a helpful AI assistant."},
-                      {"role": "user", "content": user_message}]
-        )
-        return response["choices"][0]["message"]["content"]
-
-    except Exception as e:
-        return "I'm having trouble responding right now."
+    print(f"⚠️ Entering get_gpt_response with message: {user_message[:30]}...")
     
+    if not OPENAI_API_KEY:
+        print("❌ No OpenAI API key found")
+        return "I'm sorry, but I cannot respond at the moment. (Missing API key)"
+        
+    if not USE_GPT_FALLBACK:
+        print("❌ GPT fallback is disabled")
+        return "I'm sorry, but I cannot respond at the moment. (Fallback disabled)"
+
+    print("✅ API key exists and fallback is enabled. Attempting API call...")
+    
+    try:
+        # Try with newer OpenAI client
+        print("📡 Attempting to use new OpenAI client...")
+        client = openai.OpenAI(api_key=OPENAI_API_KEY)
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful AI assistant."},
+                {"role": "user", "content": user_message}
+            ]
+        )
+        response_text = completion.choices[0].message.content
+        print(f"✅ OpenAI API call successful with new client. Response: {response_text[:30]}...")
+        return response_text
+    except AttributeError as e:
+        print(f"⚠️ AttributeError with new client: {str(e)}. Trying legacy approach...")
+        # Fall back to legacy approach
+        try:
+            print("📡 Attempting to use legacy OpenAI API...")
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a helpful AI assistant."},
+                    {"role": "user", "content": user_message}
+                ]
+            )
+            response_text = response["choices"][0]["message"]["content"]
+            print(f"✅ OpenAI API call successful with legacy client. Response: {response_text[:30]}...")
+            return response_text
+        except Exception as e:
+            print(f"❌ Error with legacy OpenAI call: {str(e)}")
+            return f"I'm sorry, but I cannot respond at the moment. (API error: {str(e)[:50]}...)"
+    except Exception as e:
+        print(f"❌ Error with new OpenAI client: {str(e)}")
+        return f"I'm sorry, but I cannot respond at the moment. (Client error: {str(e)[:50]}...)"
+        
 class CategoryListView(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer

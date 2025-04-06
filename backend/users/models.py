@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models import Count
 from django.contrib.auth.models import User 
 from django.conf import settings
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
@@ -107,3 +108,4 @@ class ContactSubmission(models.Model):
 
     def __str__(self):
         return f"Submission from {self.name} ({self.email})"
+    

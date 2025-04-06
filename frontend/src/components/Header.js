@@ -75,7 +75,7 @@ function Header({ isAuthenticated }) {
           </button>
         ) : (
           <Link to="/signin-signup">
-            <button className="sign-button">Get Started</button>
+            <button className="sign-button">Get Started / Login</button>
           </Link>
         )}
       </div>

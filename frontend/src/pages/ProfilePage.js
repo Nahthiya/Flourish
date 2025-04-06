@@ -6,9 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosInstance';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
-const BASE_URL = 'http://localhost:8000'; // Backend base URL
+const BASE_URL = 'http://localhost:8000'; 
 
-// Sample avatars with paths relative to public folder
 const avatars = [
   { id: 1, src: '/images/avatar1.png', alt: 'Avatar 1' },
   { id: 2, src: '/images/avatar2.png', alt: 'Avatar 2' },
@@ -39,9 +38,7 @@ const ProfilePage = () => {
     confirmNewPassword: '',
   });
   const [deleteConfirmation, setDeleteConfirmation] = useState(false);
-  const [fetchTrigger, setFetchTrigger] = useState(0); // New state to trigger fetchProfile
-  
-  // Use a ref instead of state for the fetching flag
+  const [fetchTrigger, setFetchTrigger] = useState(0); 
   const isFetchingRef = useRef(false);
 
   const toastConfig = useMemo(() => ({
@@ -88,7 +85,7 @@ const ProfilePage = () => {
         });
         const timestamp = Date.now();
         
-        // First check if avatar_url is in the response
+        // check if avatar_url is in the response
         let avatarUrl;
         if (data.avatar_url && data.avatar_url !== '') {
           avatarUrl = data.avatar_url.startsWith('http') 
@@ -124,7 +121,7 @@ const ProfilePage = () => {
       setLoading(false);
       isFetchingRef.current = false;
     }
-  }, [navigate, toastConfig]);// No need to include the ref in dependencies
+  }, [navigate, toastConfig]);
   
   useEffect(() => {
     let isMounted = true;
@@ -134,7 +131,7 @@ const ProfilePage = () => {
     return () => {
       isMounted = false;
     };
-  }, [fetchProfile, fetchTrigger]); // Added fetchTrigger to dependencies
+  }, [fetchProfile, fetchTrigger]); 
 
   if (loading) {
     return <div>Loading...</div>;
@@ -166,10 +163,9 @@ const ProfilePage = () => {
         console.log("Avatar upload response:", data);
         
         if (data.avatarUrl) {
-          // Store the avatar URL in local storage for future use
+          // Store the avatar URL in local storage 
           localStorage.setItem('userAvatarUrl', data.avatarUrl);
           
-          // Update the profile state directly
           const timestamp = Date.now();
           const fullAvatarUrl = data.avatarUrl.startsWith('http') 
             ? `${data.avatarUrl}?t=${timestamp}` 
@@ -178,7 +174,6 @@ const ProfilePage = () => {
           setProfile(prev => ({ ...prev, avatarUrl: fullAvatarUrl }));
         }
         
-        // Force a refresh of the profile anyway
         setFetchTrigger(prevTrigger => prevTrigger + 1);
         setShowAvatars(false);
         toast.success('Avatar updated successfully!', toastConfig);
@@ -229,7 +224,6 @@ const ProfilePage = () => {
             setProfile(prev => ({ ...prev, avatarUrl: fullAvatarUrl }));
           }
           
-          // Force a refresh of the profile for good measure
           setFetchTrigger(prevTrigger => prevTrigger + 1);
           toast.success('Profile picture uploaded successfully!', toastConfig);
         } else {

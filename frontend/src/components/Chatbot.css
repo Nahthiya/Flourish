@@ -194,6 +194,7 @@ margin-left: 300px;
 .message-container.bot {
   justify-content: flex-start;
   align-self: flex-start;
+  margin-right: auto;
 }
 
 .chat-avatar {
