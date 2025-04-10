@@ -32,21 +32,23 @@ function MenstrualTracker() {
     const refOne = useRef(null);
     const [calendarDate, setCalendarDate] = useState(new Date());
     const [selectedDateSymptoms, setSelectedDateSymptoms] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-    //fetch user
+
     useEffect(() => {
-        const fetchUsername = async () => {
-            try {
-                const response = await axiosInstance.get('../users/auth-status/');
-                setUsername(response.data.username);
-            } catch (error) {
-                console.error("Error fetching username:", error);
-            }
-        };
-        fetchUsername();
-        fetchData();
-        fetchSymptoms();
-    }, []);
+      const fetchUsername = async () => {
+          try {
+              const response = await axiosInstance.get("/users/auth-status/");
+              setUsername(response.data.username);
+          } catch (error) {
+              console.error("Error fetching username:", error);
+          }
+      };
+  
+      fetchUsername();
+      fetchData();
+      fetchSymptoms();
+  }, []);
 
     useEffect(() => {
         if (menstrualData.length > 0) fetchPredictions();
@@ -230,6 +232,21 @@ function MenstrualTracker() {
           setLoading(false);
         }
       };
+      //delete period
+      const handleDeletePeriod = async (id) => {
+        if (window.confirm("Are you sure you want to delete this period?")) {
+            try {
+                await axiosInstance.delete(`/users/menstrual-data/${id}/`);
+                toast.success("Period deleted successfully");
+                fetchData(); // Refresh the data after deletion
+                fetchPredictions(); // Update predictions after deletion
+                setShowDeleteModal(false); // Close the modal after deletion
+            } catch (error) {
+                console.error("Error deleting period:", error);
+                toast.error("Failed to delete period");
+            }
+        }
+    };
 
     //marked dates
     const getMarkedDates = () => {
@@ -974,7 +991,6 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
           variation
         };
       };
-
       return (
         <div className="menstrual-tracker-container">
         
@@ -1056,6 +1072,9 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
             <div className="calendar-buttons">
               <button className="log-period-btn" onClick={() => setShowPeriodModal(true)}>Log Period</button>
               <button className="log-symptoms-btn" onClick={() => setShowSymptomModal(true)}>Log Symptoms</button>
+              <button onClick={() => setShowDeleteModal(true)} className="delete-periods-btn">
+    Delete Periods
+</button>
             </div>
           </div>
         </div>
@@ -1171,6 +1190,49 @@ const currentCycleDay = rawCycleDay !== "N/A" && daysRemaining !== "N/A" && days
                     selectedDate={new Date()}
                 />
             )}
+            {/* Delete Period Modal */}
+            {showDeleteModal && (
+    <div className="modal-overlay">
+<div className="modal-content">
+    <button 
+        onClick={() => setShowDeleteModal(false)} 
+        style={{ 
+            position: 'absolute', 
+            top: '10px', 
+            right: '10px', 
+            background: 'none', 
+            border: 'none', 
+            fontSize: '18px', 
+            cursor: 'pointer', 
+            color: '#5e4b8b' 
+        }}
+    >
+        ✕
+    </button>
+    <h2>Delete Period Data</h2>
+    {menstrualData.length > 0 ? (
+        <ul className="delete-period-list">
+            {menstrualData.map((entry) => (
+                <li key={entry.id} className="delete-period-item">
+                    <span>
+                        {format(parseISO(entry.start_date), "MMM d, yyyy")} to{" "}
+                        {format(parseISO(entry.end_date), "MMM d, yyyy")} ({entry.period_length} days)
+                    </span>
+                    <button className="delete-btn" onClick={() => handleDeletePeriod(entry.id)}>
+                        Delete
+                    </button>
+                </li>
+            ))}
+        </ul>
+    ) : (
+        <p>No periods logged yet.</p>
+    )}
+    <div className="modal-buttons">
+        <button onClick={() => setShowDeleteModal(false)}>Close</button>
+    </div>
+</div>
+    </div>
+)}
             {selectedDateSymptoms && (
             <div className="symptom-overlay">
                 <div className="symptom-content">

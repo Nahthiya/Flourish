@@ -609,6 +609,33 @@ class UpdateBotNameView(APIView):
         return Response({"message": "Assistant name updated successfully"}, status=status.HTTP_200_OK)
     
 
+class DeleteMenstrualDataView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, id):
+        user = request.user
+        try:
+            menstrual_data = MenstrualData.objects.get(id=id, user=user)
+            menstrual_data.delete()
+            return Response({"message": "Period data deleted successfully"}, status=status.HTTP_200_OK)
+        except MenstrualData.DoesNotExist:
+            return Response({"message": "Period data not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error deleting period data: {str(e)}")
+            return Response({"message": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class UserDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        return Response({
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            # Add other user fields as needed
+        })
+
 class SymptomReportView(APIView):
     permission_classes = [IsAuthenticated]
 
