@@ -85,7 +85,19 @@ class RegisterUserView(APIView):
             # Create the user
             user = CustomUser.objects.create_user(username=username, email=email, password=password)
             user.save()
-            return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
+            # Generate tokens for immediate login after registration
+            refresh = RefreshToken.for_user(user)
+        
+            return Response({
+            "message": "User created successfully",
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+            }
+             }, status=status.HTTP_201_CREATED)
         except Exception as e:
             logger.error(f"Error creating user: {str(e)}")
             return Response({"message": f"Error creating user: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

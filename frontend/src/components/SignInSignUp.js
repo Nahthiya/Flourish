@@ -81,18 +81,29 @@ function SignInSignUp({ onSuccess, setIsAuthenticated = () => {} }) {
       toast.error("Passwords do not match.", toastConfig);
       return;
     }
-    try {
-      const response = await axiosInstance.post("/users/register/", signUpData);
-      console.log("Sign-Up Response:", response.data);
-      toast.success("Sign-Up Successful!", toastConfig);
-      setIsAuthenticated(true);
-      setTimeout(() => {
-        navigate("/home");
-      }, 3000); // Match autoClose duration
-      if (onSuccess) onSuccess();
-    } catch (error) {
-      toast.error("Sign-Up Failed: " + (error.response?.data?.message || "Server error"), toastConfig);
-    }
+// In handleSignUpSubmit function (SignInSignUp.js)
+try {
+  const response = await axiosInstance.post("/users/register/", signUpData);
+  console.log("Sign-Up Response:", response.data);
+  
+  // Store tokens if they're returned
+  if (response.data.access && response.data.refresh) {
+    localStorage.setItem("accessToken", response.data.access);
+    localStorage.setItem("refreshToken", response.data.refresh);
+  }
+  
+  setIsAuthenticated(true);
+  toast.success("Sign-Up Successful!", toastConfig);
+  
+  setTimeout(() => {
+    navigate("/home");
+  }, 3000); // Match autoClose duration
+  
+  if (onSuccess) onSuccess();
+} catch (error) {
+  console.error("Sign-Up Error:", error);
+  toast.error("Sign-Up Failed: " + (error.response?.data?.message || "Server error"), toastConfig);
+}
   };
 
   return (
